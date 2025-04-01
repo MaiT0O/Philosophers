@@ -19,11 +19,16 @@ int validate_arguments(int argc, char **argv)
 
 int initialize_data(t_data *data, int argc, char **argv)
 {
+	struct timeval tv;
+
     data->philo_count = ft_atoi_custom(argv[1]);
     data->time_to_die = ft_atoi_custom(argv[2]);
     data->time_to_eat = ft_atoi_custom(argv[3]);
     data->time_to_sleep = ft_atoi_custom(argv[4]);
-    data->must_eat_count = (argc == 6) ? ft_atoi_custom(argv[5]) : -1;
+	if (argc == 6)
+		data->must_eat_count = ft_atoi_custom(argv[5]);
+	else
+		data->must_eat_count = -1;
     data->philo_full = 0;
     data->start = 0;
     data->forks = NULL;
@@ -34,6 +39,12 @@ int initialize_data(t_data *data, int argc, char **argv)
         printf("Error: All arguments must be positive integers.\n");
         return (0);
     }
+	if (gettimeofday(&tv, NULL) != 0)
+    {
+        printf("Error: Failed to get current time.\n");
+        return (0);
+    }
+    data->start = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
     return (1);
 }
 
@@ -114,6 +125,7 @@ int main(int argc, char **argv)
 		return (0);
 	if (!initialize_mutexes(&data))
 		return (0);
-
+	
+	
     return (0);
 }

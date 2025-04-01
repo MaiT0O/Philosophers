@@ -28,8 +28,8 @@ typedef struct s_data
     int				must_eat_count;
     int				philo_full;
     long			start;
-    pthread_mutex_t	*forks;
     pthread_mutex_t	print;
+    pthread_mutex_t	*forks;
     t_philo			*philos;
 }				t_data;
 
