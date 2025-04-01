@@ -28,11 +28,27 @@ typedef struct s_data
     int				must_eat_count;
     int				philo_full;
     long			start;
+    int				simulation_running;
     pthread_mutex_t	print;
     pthread_mutex_t	*forks;
+	pthread_t		monitor_thread;
     t_philo			*philos;
 }				t_data;
 
 long	ft_atoi_custom(const char *str);
+void *philosopher_routine(void *arg);
+void *monitor_routine(void *arg);
+
+// Messages pour les philosophes
+#define MSG_TAKE_FORK "has taken a fork"
+#define MSG_EATING "is eating"
+#define MSG_SLEEPING "is sleeping"
+#define MSG_THINKING "is thinking"
+#define MSG_DIED "died"
+
+// Autres messages
+#define ERR_INVALID_ARGS "Error: Invalid arguments. All values must be positive integers."
+#define ERR_MEMORY_ALLOC "Error: Failed to allocate memory."
+#define USAGE "Usage: ./philosophers number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]"
 
 #endif

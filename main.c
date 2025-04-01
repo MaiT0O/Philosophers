@@ -17,7 +17,7 @@ int validate_arguments(int argc, char **argv)
     return (1);
 }
 
-int initialize_data(t_data *data, int argc, char **argv)
+int init_data(t_data *data, int argc, char **argv)
 {
 	struct timeval tv;
 
@@ -31,6 +31,7 @@ int initialize_data(t_data *data, int argc, char **argv)
 		data->must_eat_count = -1;
     data->philo_full = 0;
     data->start = 0;
+	data->simulation_running = 1;
     data->forks = NULL;
     data->philos = NULL;
 
@@ -48,7 +49,7 @@ int initialize_data(t_data *data, int argc, char **argv)
     return (1);
 }
 
-int	initialize_philosophers(t_data *data)
+int	init_philosophers(t_data *data)
 {
 	int i;
 
@@ -61,7 +62,7 @@ int	initialize_philosophers(t_data *data)
 	i = 0;
 	while (i < data->philo_count)
 	{
-		data->philos[i].id = i;
+		data->philos[i].id = i + 1;
 		data->philos[i].left_fork = i;
 		data->philos[i].right_fork = (i + 1) % data->philo_count;
 		data->philos[i].eat_count = 0;
@@ -72,7 +73,7 @@ int	initialize_philosophers(t_data *data)
 	return (1);
 }
 
-int	initialize_mutexes(t_data *data)
+int	init_mutexes(t_data *data)
 {
 	int i;
 
@@ -87,8 +88,10 @@ int	initialize_mutexes(t_data *data)
 	{
 		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
 		{
-			printf("Error: Failed to initialize mutex.\n");
-			return (0);
+			while (--i >= 0)
+                pthread_mutex_destroy(&data->forks[i]);
+            free(data->forks);
+            return (0);
 		}
 		i++;
 	}
@@ -100,32 +103,67 @@ int	initialize_mutexes(t_data *data)
 	return (1);
 }
 
+int create_threads(t_data *data)
+{
+    int i;
+
+    i = 0;
+    while (i < data->philo_count)
+    {
+        if (pthread_create(&data->philos[i].thread, NULL, philosopher_routine, &data->philos[i]) != 0)
+        {
+            printf("Error: Failed to create thread for philosopher %d.\n", i + 1);
+            return (0);
+        }
+        i++;
+    }
+	if (pthread_create(&data->monitor_thread, NULL, monitor_routine, data) != 0)
+	{
+		printf("Error: Failed to create monitor thread.\n");
+		return (0);
+	}
+    return (1);
+}
+
+void join_threads(t_data *data)
+{
+    int i;
+
+    i = 0;
+    while (i < data->philo_count)
+    {
+        pthread_join(data->philos[i].thread, NULL);
+        i++;
+    }
+}
+
 int main(int argc, char **argv)
 {
     t_data data;
 
     if (argc < 5 || argc > 6)
     {
-        printf("Usage: %s number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]\n", argv[0]);
+        printf("%s\n", USAGE);
         return (1);
     }
     if (!validate_arguments(argc, argv))
-        return (0);
+        return (1);
     if (!initialize_data(&data, argc, argv))
-        return (0);
+        return (1);
+    if (!initialize_philosophers(&data))
+        return (1);
+    if (!initialize_mutexes(&data))
+        return (1);
+    if (!create_threads(&data))
+        return (1);
+    join_threads(&data);
+    // Nettoyer les ressources
+    int i = 0;
+    while (i < data.philo_count)
+        pthread_mutex_destroy(&data.forks[i++]);
+    pthread_mutex_destroy(&data.print);
+    free(data.forks);
+    free(data.philos);
 
-    printf("Initialization successful!\n");
-    printf("Philosophers: %d, Time to die: %dms, Time to eat: %dms, Time to sleep: %dms, Must eat: %d\n",
-           data.philo_count, data.time_to_die, data.time_to_eat, data.time_to_sleep,
-           (data.must_eat_count == -1) ? 0 : data.must_eat_count);
-
-    // Vous pouvez maintenant continuer avec l'initialisation des philosophes et des mutex.
-	// Vous pouvez également ajouter des fonctions pour libérer la mémoire et afficher des messages.
-	if (!initialize_philosophers(&data))
-		return (0);
-	if (!initialize_mutexes(&data))
-		return (0);
-	
-	
     return (0);
 }
