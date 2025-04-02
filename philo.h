@@ -38,6 +38,10 @@ typedef struct s_data
 long	ft_atoi_custom(const char *str);
 void *philosopher_routine(void *arg);
 void *monitor_routine(void *arg);
+int	free_all(t_data *data, int flag);
+void join_threads(t_data *data);
+int validate_arguments(int argc, char **argv);
+long	get_time_ms(void);
 
 // Messages pour les philosophes
 #define MSG_TAKE_FORK "has taken a fork"
@@ -50,5 +54,6 @@ void *monitor_routine(void *arg);
 #define ERR_INVALID_ARGS "Error: Invalid arguments. All values must be positive integers."
 #define ERR_MEMORY_ALLOC "Error: Failed to allocate memory."
 #define USAGE "Usage: ./philosophers number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]"
+#define ERR_THREAD "Error: Failed to create thread for philosopher"
 
 #endif
