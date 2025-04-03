@@ -56,25 +56,27 @@ long	ft_atoi_custom(const char *str)
 	return (res);
 }
 
-int	free_all(t_data *data, int flag)
+int free_all(t_data *data, int flag)
 {
-	int	i;
+    int i;
 
-	i = -1;
-    while (++i < data->philo_count)
-	{
-		if (&data->forks[i] != NULL)
-        	pthread_mutex_destroy(&data->forks[i]);
-	}
-	if (data->forks != NULL)
-    	free(data->forks);
+    if (data->forks)
+    {
+        i = -1;
+        while (++i < data->philo_count)
+            pthread_mutex_destroy(&data->forks[i]);
+        free(data->forks);
+        data->forks = NULL;
+    }
 	if (flag == 1)
 		return (0);
-	if (&data->print != NULL)
-    	pthread_mutex_destroy(&data->print);
-	if (data->philos != NULL)
-    	free(data->philos);
-	return (0);
+    pthread_mutex_destroy(&data->print);
+    if (data->philos)
+    {
+        free(data->philos);
+        data->philos = NULL;
+    }
+    return (0);
 }
 
 void join_threads(t_data *data)

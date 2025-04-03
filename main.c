@@ -23,9 +23,8 @@ int init_data(t_data *data, int argc, char **argv)
 	if (argc == 6)
 		data->must_eat_count = ft_atoi_custom(argv[5]);
 	else
-		data->must_eat_count = -1;
+		data->must_eat_count = INT_MIN;
     data->philo_full = 0;
-    data->start = 0;
 	data->simulation_running = 1;
     data->forks = NULL;
     data->philos = NULL;
@@ -98,9 +97,6 @@ int	init_mutexes(t_data *data)
 
 int create_monitor_thread(t_data *data)
 {
-    int i;
-
-    i = 0;
 	if (pthread_create(&data->monitor_thread, NULL,
 		 monitor_routine, data) != 0)
 	{
@@ -119,17 +115,21 @@ int main(int argc, char **argv)
         printf("%s\n", USAGE);
         return (1);
     }
-    if (!validate_arguments(argc, argv))
+	if (!validate_arguments(argc, argv))
         return (0);
-    if (!init_data(&data, argc, argv))
+	if (!init_data(&data, argc, argv))
         return (0);
-    if (!init_mutexes(&data))
+	if (!init_mutexes(&data))
         return (free_all(&data, 1));
-    if (!init_philosophers(&data))
+	if (!init_philosophers(&data))
         return (free_all(&data, 0));
-    if (!create_monitor_thread(&data))
-        return (0);
-    join_threads(&data);
-    free_all(&data, 0);
+	if (!create_monitor_thread(&data))
+	{
+		join_threads(&data);
+		free_all(&data, 0);
+		return (0);
+	}
+	join_threads(&data);
+	free_all(&data, 0);
     return (1);
 }

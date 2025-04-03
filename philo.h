@@ -42,6 +42,9 @@ int	free_all(t_data *data, int flag);
 void join_threads(t_data *data);
 int validate_arguments(int argc, char **argv);
 long	get_time_ms(void);
+void take_forks(t_philo *philo);
+void release_forks(t_philo *philo);
+int is_dead(t_philo *philo);
 
 // Messages pour les philosophes
 #define MSG_TAKE_FORK "has taken a fork"
