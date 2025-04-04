@@ -15,6 +15,7 @@ typedef struct s_philo
     int				right_fork;
     int				eat_count;
     long			last_eat;
+    long            time_before_die;
     pthread_t		thread;
     struct s_data	*data;
 }				t_philo;
@@ -45,6 +46,7 @@ long	get_time_ms(void);
 void take_forks(t_philo *philo);
 void release_forks(t_philo *philo);
 int is_dead(t_philo *philo);
+void    print_death(t_philo *philo);
 
 // Messages pour les philosophes
 #define MSG_TAKE_FORK "has taken a fork"
