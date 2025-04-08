@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:23:01 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/04 13:06:16 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/08 14:58:02 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,6 @@ void join_threads(t_data *data)
         pthread_join(data->philos[i].thread, NULL);
         i++;
     }
-	pthread_join(data->monitor_thread, NULL);
 }
 
 int validate_arguments(int argc, char **argv)

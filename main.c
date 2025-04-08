@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:53 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/04 13:35:28 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/08 16:49:46 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	init_philosophers(t_data *data)
 		data->philos[i].left_fork = i;
 		data->philos[i].right_fork = (i + 1) % data->philo_count;
 		data->philos[i].eat_count = 0;
-		data->philos[i].last_eat = 0;
+		data->philos[i].last_eat = get_time_ms();
 		data->philos[i].data = data;
         if (pthread_create(&data->philos[i].thread, NULL,
 			philosopher_routine, &data->philos[i]) != 0)
@@ -129,7 +129,6 @@ int main(int argc, char **argv)
 		free_all(&data, 0);
 		return (0);
 	}
-	join_threads(&data);
-	free_all(&data, 0);
-    return (1);
+	pthread_join(data.monitor_thread, NULL);
+    return (0);
 }

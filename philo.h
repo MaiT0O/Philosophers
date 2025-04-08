@@ -15,7 +15,7 @@ typedef struct s_philo
     int				right_fork;
     int				eat_count;
     long			last_eat;
-    long            time_before_die;
+    long            time_since_last_meal;
     pthread_t		thread;
     struct s_data	*data;
 }				t_philo;
