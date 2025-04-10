@@ -14,9 +14,9 @@
 
 void	print_fork(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->data->print);
+	pthread_mutex_lock(philo->data->print);
 	printf("%ld %d %s\n",get_time_ms(), philo->id, MSG_TAKE_FORK);
-	pthread_mutex_unlock(&philo->data->print);
+	pthread_mutex_unlock(philo->data->print);
 }
 
 void release_forks(t_philo *philo)
@@ -74,10 +74,13 @@ void take_forks(t_philo *philo)
 
 int is_dead(t_philo *philo)
 {
-    long current_time = get_time_ms();
-    philo->time_since_last_meal = current_time - philo->last_eat;
-    
-    if (philo->time_since_last_meal > philo->data->time_to_die)
+    long	current_time;
+	long	time_since_last_meal;
+
+	current_time = get_time_ms();
+    time_since_last_meal = current_time - philo->last_eat;
+
+    if (time_since_last_meal > philo->data->time_to_die)
         return (1);
     return (0);
 }
@@ -96,9 +99,10 @@ long	get_time_ms(void)
 	return (res);
 }
 
-/*void    print_death(t_philo *philo)
+void    print_death(t_philo *philo)
 {
-    pthread_mutex_lock(&philo->data->print);
-    printf("philo[%d] %ld ms before die\n", philo->id, philo->time_before_die);
-	pthread_mutex_unlock(&philo->data->print);
-}*/
+    pthread_mutex_lock(philo->data->print);
+	printf("philophe[%d] hasn't eat since %ld ms\n", philo->id, get_time_ms() - philo->last_eat);
+    printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_DIED);
+	pthread_mutex_unlock(philo->data->print);
+}

@@ -37,6 +37,17 @@ int init_data(t_data *data, int argc, char **argv)
     return (1);
 }
 
+void	data_philo_init(t_data *data, int i)
+{
+	data->philos[i].death = 0;
+	data->philos[i].id = i + 1;
+	data->philos[i].left_fork = i;
+	data->philos[i].right_fork = (i + 1) % data->philo_count;
+	data->philos[i].eat_count = 0;
+	data->philos[i].last_eat = get_time_ms();
+	data->philos[i].data = data;
+}
+
 int	init_philosophers(t_data *data)
 {
 	int i;
@@ -50,12 +61,7 @@ int	init_philosophers(t_data *data)
 	i = -1;
 	while (++i < data->philo_count)
 	{
-		data->philos[i].id = i + 1;
-		data->philos[i].left_fork = i;
-		data->philos[i].right_fork = (i + 1) % data->philo_count;
-		data->philos[i].eat_count = 0;
-		data->philos[i].last_eat = get_time_ms();
-		data->philos[i].data = data;
+		data_philo_init(data, i);
         if (pthread_create(&data->philos[i].thread, NULL,
 			philosopher_routine, &data->philos[i]) != 0)
         {
@@ -72,7 +78,8 @@ int	init_mutexes(t_data *data)
 
 	data->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
 		 * data->philo_count);
-	if (!data->forks)
+	data->print = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+	if (!data->forks || !data->print)
 	{
 		printf("%s for forks.\n", ERR_MEMORY_ALLOC);
 		return (0);
@@ -87,7 +94,7 @@ int	init_mutexes(t_data *data)
 		}
 		i++;
 	}
-	if (pthread_mutex_init(&data->print, NULL) != 0)
+	if (pthread_mutex_init(data->print, NULL) != 0)
 	{
 		printf("Error: Failed to initialize mutex.\n");
 		return (0);
@@ -124,11 +131,7 @@ int main(int argc, char **argv)
 	if (!init_philosophers(&data))
         return (free_all(&data, 0));
 	if (!create_monitor_thread(&data))
-	{
-		join_threads(&data);
-		free_all(&data, 0);
-		return (0);
-	}
-	pthread_join(data.monitor_thread, NULL);
+		return (free_all(&data, 0));
+	end(&data);
     return (0);
 }

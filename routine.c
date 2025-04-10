@@ -19,13 +19,15 @@ void philosopher_think(t_philo *philo)
         long time_to_think;
     
         // Calculer le temps de réflexion en fonction du temps avant de mourir
-        time_to_think = philo->data->time_to_die - (get_time_ms() - philo->last_eat) - philo->data->time_to_eat / 2;
-        if (time_to_think < 0)
-            time_to_think = 0;
+        time_to_think = (philo->data->time_to_die - (get_time_ms() - philo->last_eat) - philo->data->time_to_eat - philo->data->time_to_sleep) / 2;
+		if (time_to_think < 0)
+			time_to_think = 0;
+		if (time_to_think == 0)
+			time_to_think = 1;
     
-        pthread_mutex_lock(&philo->data->print);
+        pthread_mutex_lock(philo->data->print);
         printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_THINKING);
-        pthread_mutex_unlock(&philo->data->print);
+        pthread_mutex_unlock(philo->data->print);
     
         // Simuler le temps de réflexion
         usleep(time_to_think * 1000);
@@ -36,10 +38,10 @@ void philosopher_think(t_philo *philo)
 void philosopher_sleep(t_philo *philo)
 {
     if (philo->data->simulation_running)
-    {  
-        pthread_mutex_lock(&philo->data->print);
+    {
+        pthread_mutex_lock(philo->data->print);
         printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_SLEEPING);
-        pthread_mutex_unlock(&philo->data->print);
+        pthread_mutex_unlock(philo->data->print);
         usleep(philo->data->time_to_sleep * 1000);
     }
     return ;
@@ -49,9 +51,10 @@ void	philosopher_eat(t_philo *philo)
 {
     if (philo->data->simulation_running)
     {
-        pthread_mutex_lock(&philo->data->print);
+        pthread_mutex_lock(philo->data->print);
+		printf("philophe[%d] hasn't eat since %ld ms\n", philo->id, get_time_ms() - philo->last_eat);
         printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_EATING);
-        pthread_mutex_unlock(&philo->data->print);
+        pthread_mutex_unlock(philo->data->print);
         philo->last_eat = get_time_ms();
         philo->eat_count++;
         usleep(philo->data->time_to_eat * 1000);
@@ -63,16 +66,14 @@ void	philosopher_eat(t_philo *philo)
 
 void    stop_sim(t_data *data, int flag, int i)
 {
-    pthread_mutex_lock(&data->print);
-    if (flag == 1)
-        printf("tous les philosophes ont manger a leur faim\n");
-    else if (flag == 0)
-    {       
-        usleep(10000);
-        printf("%ld %d %s\n", get_time_ms(), data->philos[i].id, MSG_DIED);
-    }
+	usleep(10000);
 	data->simulation_running = 0;
-	pthread_mutex_unlock(&data->print);
+    pthread_mutex_lock(data->print);
+	if (flag == 1)
+		printf("tous les philosophes ont manger a leur faim\n");
+	else if (flag == 0)
+		data->philos[i].death = 1;
+	pthread_mutex_unlock(data->print);
     return ;
 }
 
@@ -86,16 +87,12 @@ void *monitor_routine(void *arg)
         i = -1;
         while (++i < data->philo_count)
         {
-            if (is_dead(&data->philos[i]))
-                stop_sim(data, 0, i);
-            else if (data->philo_full == data->philo_count)
+            if (data->philo_full == data->philo_count)
                 stop_sim(data, 1, i);
+            else if (is_dead(&data->philos[i]))
+                stop_sim(data, 0, i);
             if (!data->simulation_running)
-            {
-                join_threads(data);
-                free_all(data, 0);
                 return (NULL);
-            }
         }
         usleep(1000); // Vérifier périodiquement
     }
@@ -111,14 +108,12 @@ void *philosopher_routine(void *arg)
         if (!philo->data->simulation_running)
             break;
         take_forks(philo);
-        if (!philo->data->simulation_running) // Vérifier après avoir pris les fourchettes
+        if (!philo->data->simulation_running)
         {
             release_forks(philo);
             break;
         }
-        /*print_before_death(philo);*/
         philosopher_eat(philo);
-        /*print_before_death(philo);*/
         release_forks(philo);
         if (!philo->data->simulation_running)
             break;
@@ -126,7 +121,8 @@ void *philosopher_routine(void *arg)
         if (!philo->data->simulation_running)
             break;
         philosopher_sleep(philo);
-        printf("philo[%d] has lived %ld ms since his last eat\n", philo->id, philo->time_since_last_meal);
     }
+	if (philo->death == 1)
+		print_death(philo);
     return (NULL);
 }

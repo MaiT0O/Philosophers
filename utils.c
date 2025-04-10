@@ -68,18 +68,22 @@ int free_all(t_data *data, int flag)
         free(data->forks);
         data->forks = NULL;
     }
+	if (data->print)
+	{
+		pthread_mutex_destroy(data->print);
+		free(data->print);
+	}
 	if (flag == 1)
-		return (0);
-    pthread_mutex_destroy(&data->print);
+		return (1);
     if (data->philos)
     {
         free(data->philos);
         data->philos = NULL;
     }
-    return (0);
+    return (1);
 }
 
-void join_threads(t_data *data)
+void end(t_data *data)
 {
     int i;
 
@@ -89,6 +93,9 @@ void join_threads(t_data *data)
         pthread_join(data->philos[i].thread, NULL);
         i++;
     }
+	pthread_join(data->monitor_thread, NULL);
+	free_all(data, 0);
+	return ;
 }
 
 int validate_arguments(int argc, char **argv)

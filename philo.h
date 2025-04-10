@@ -14,8 +14,8 @@ typedef struct s_philo
     int				left_fork;
     int				right_fork;
     int				eat_count;
+    int             death;
     long			last_eat;
-    long            time_since_last_meal;
     pthread_t		thread;
     struct s_data	*data;
 }				t_philo;
@@ -30,7 +30,7 @@ typedef struct s_data
     int				philo_full;
     long			start;
     int				simulation_running;
-    pthread_mutex_t	print;
+    pthread_mutex_t	*print;
     pthread_mutex_t	*forks;
 	pthread_t		monitor_thread;
     t_philo			*philos;
@@ -40,7 +40,7 @@ long	ft_atoi_custom(const char *str);
 void *philosopher_routine(void *arg);
 void *monitor_routine(void *arg);
 int	free_all(t_data *data, int flag);
-void join_threads(t_data *data);
+void end(t_data *data);
 int validate_arguments(int argc, char **argv);
 long	get_time_ms(void);
 void take_forks(t_philo *philo);
