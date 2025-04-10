@@ -56,18 +56,18 @@ long	ft_atoi_custom(const char *str)
 	return (res);
 }
 
-int free_all(t_data *data, int flag)
+int	free_all(t_data *data, int flag)
 {
-    int i;
+	int i;
 
-    if (data->forks)
-    {
-        i = -1;
-        while (++i < data->philo_count)
-            pthread_mutex_destroy(&data->forks[i]);
-        free(data->forks);
-        data->forks = NULL;
-    }
+	if (data->forks)
+	{
+		i = -1;
+		while (++i < data->philo_count)
+			pthread_mutex_destroy(&data->forks[i]);
+		free(data->forks);
+		data->forks = NULL;
+	}
 	if (data->print)
 	{
 		pthread_mutex_destroy(data->print);
@@ -75,42 +75,40 @@ int free_all(t_data *data, int flag)
 	}
 	if (flag == 1)
 		return (1);
-    if (data->philos)
-    {
-        free(data->philos);
-        data->philos = NULL;
-    }
-    return (1);
+	if (data->philos)
+	{
+		free(data->philos);
+		data->philos = NULL;
+	}
+	return (1);
 }
 
-void end(t_data *data)
+void	end(t_data *data)
 {
-    int i;
-
-    i = 0;
-    while (i < data->philo_count)
-    {
-        pthread_join(data->philos[i].thread, NULL);
-        i++;
-    }
+	int i;
+		i = 0;
+	while (i < data->philo_count)
+	{
+		pthread_join(data->philos[i].thread, NULL);
+		i++;
+	}
 	pthread_join(data->monitor_thread, NULL);
 	free_all(data, 0);
 	return ;
 }
 
-int validate_arguments(int argc, char **argv)
+int	validate_arguments(int argc, char **argv)
 {
-    int i;
-
-    i = 1;
-    while (i < argc)
-    {
-        if (ft_atoi_custom(argv[i]) <= 0)
-        {
-            printf("%s\n", ERR_INVALID_ARGS);
-            return (0);
-        }
-        i++;
-    }
-    return (1);
+	int i;
+		i = 1;
+	while (i < argc)
+	{
+		if (ft_atoi_custom(argv[i]) <= 0)
+		{
+			printf("%s\n", ERR_INVALID_ARGS);
+			return (0);
+		}
+		i++;
+	}
+	return (1);
 }

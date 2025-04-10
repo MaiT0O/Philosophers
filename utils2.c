@@ -12,77 +12,28 @@
 
 #include "philo.h"
 
-void	print_fork(t_philo *philo)
+int	is_dead(t_philo *philo)
 {
-	pthread_mutex_lock(philo->data->print);
-	printf("%ld %d %s\n",get_time_ms(), philo->id, MSG_TAKE_FORK);
-	pthread_mutex_unlock(philo->data->print);
-}
-
-void release_forks(t_philo *philo)
-{
-	pthread_mutex_unlock(&philo->data->forks[philo->right_fork]);
-	pthread_mutex_unlock(&philo->data->forks[philo->left_fork]);
-}
-
-int	safe_forks(t_philo *philo, int flag)
-{
-	if (!philo->data->simulation_running)
-    {
-    	if (philo->id % 2 == 0 && flag == 0)
-            pthread_mutex_unlock(&philo->data->forks[philo->left_fork]);
-		else if (philo->id % 2 == 0 && flag == 1)
-			release_forks(philo);
-        else if (philo->id % 2 != 0 && flag == 0)
-            pthread_mutex_unlock(&philo->data->forks[philo->right_fork]);
-		else if (philo->id % 2 != 0 && flag == 1)
-			release_forks(philo);
-		printf("philo[%d] release fork\n", philo->id);
-        return (0);
-    }
-	return (1);
-}
-
-void take_forks(t_philo *philo)
-{
-	if (philo->data->simulation_running)
-	{
-		if (philo->id % 2 == 0)
-		{
-			pthread_mutex_lock(&philo->data->forks[philo->left_fork]);
-			if (!safe_forks(philo, 0))
-				return ;
-			print_fork(philo);
-			pthread_mutex_lock(&philo->data->forks[philo->right_fork]);
-			if (!safe_forks(philo, 1))
-				return ;
-			print_fork(philo);
-		}
-		else
-		{
-			pthread_mutex_lock(&philo->data->forks[philo->right_fork]);
-			if (!safe_forks(philo, 0))
-				return ;
-			print_fork(philo);
-			pthread_mutex_lock(&philo->data->forks[philo->left_fork]);
-			if (!safe_forks(philo, 1))
-				return ;
-			print_fork(philo);
-		}
-	}
-}
-
-int is_dead(t_philo *philo)
-{
-    long	current_time;
+	long	current_time;
 	long	time_since_last_meal;
 
 	current_time = get_time_ms();
-    time_since_last_meal = current_time - philo->last_eat;
+	time_since_last_meal = current_time - philo->last_eat;
+	if (time_since_last_meal > philo->data->time_to_die)
+	{
+		philo->death = 1;
+		philo->death_time = time_since_last_meal;
+		return (1);
+	}
+	return (0);
+}
 
-    if (time_since_last_meal > philo->data->time_to_die)
-        return (1);
-    return (0);
+void	print_death(t_philo *philo)
+{
+	pthread_mutex_lock(philo->data->print);
+	printf("philophe[%d] hasn't eat since %ld ms\n", philo->id, philo->death_time);
+	printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_DIED);
+	pthread_mutex_unlock(philo->data->print);
 }
 
 long	get_time_ms(void)
@@ -91,18 +42,32 @@ long	get_time_ms(void)
 	long	res;
 
 	if (gettimeofday(&tv, NULL) != 0)
-    {
-        printf("Error: Failed to get current time.\n");
-        return (-1);
-    }
-    res = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	{
+		printf("Error: Failed to get current time.\n");
+		return (-1);
+	}
+	res = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 	return (res);
 }
 
-void    print_death(t_philo *philo)
+int	create_monitor_thread(t_data *data)
 {
-    pthread_mutex_lock(philo->data->print);
-	printf("philophe[%d] hasn't eat since %ld ms\n", philo->id, get_time_ms() - philo->last_eat);
-    printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_DIED);
-	pthread_mutex_unlock(philo->data->print);
+	if (pthread_create(&data->monitor_thread, NULL,
+		 monitor_routine, data) != 0)
+	{
+		printf("Error: Failed to create monitor thread.\n");
+		return (0);
+	}
+	return (1);
+}
+
+void	stop_sim(t_data *data, int flag)
+{
+	usleep(10000);
+	data->simulation_running = 0;
+	pthread_mutex_lock(data->print);
+	if (flag == 1)
+		printf("tous les philosophes ont manger a leur faim\n");
+	pthread_mutex_unlock(data->print);
+	return ;
 }
