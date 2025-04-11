@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/04 13:06:09 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/08 16:43:03 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/11 17:14:50 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,17 +23,12 @@ int	is_dead(t_philo *philo)
 	{
 		philo->death = 1;
 		philo->death_time = time_since_last_meal;
+		usleep(10000);
+		philo->data->simulation_running = 0;
+		print_death(philo);
 		return (1);
 	}
 	return (0);
-}
-
-void	print_death(t_philo *philo)
-{
-	pthread_mutex_lock(philo->data->print);
-	printf("philophe[%d] hasn't eat since %ld ms\n", philo->id, philo->death_time);
-	printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_DIED);
-	pthread_mutex_unlock(philo->data->print);
 }
 
 long	get_time_ms(void)
@@ -50,6 +45,15 @@ long	get_time_ms(void)
 	return (res);
 }
 
+long	correct_time(t_data *data)
+{
+	long	time;
+
+	time = get_time_ms();
+	time = time - data->start;
+	return (time);
+}
+
 int	create_monitor_thread(t_data *data)
 {
 	if (pthread_create(&data->monitor_thread, NULL,
@@ -61,13 +65,14 @@ int	create_monitor_thread(t_data *data)
 	return (1);
 }
 
-void	stop_sim(t_data *data, int flag)
+int	init_alone_philo(t_data *data)
 {
-	usleep(10000);
-	data->simulation_running = 0;
-	pthread_mutex_lock(data->print);
-	if (flag == 1)
-		printf("tous les philosophes ont manger a leur faim\n");
-	pthread_mutex_unlock(data->print);
-	return ;
+	data_philo_init(data, 0);
+	if (pthread_create(&data->philos[0].thread, NULL,
+			alone_philosophe_routine, &data->philos[0]) != 0)
+	{
+		printf("%s %d.\n", ERR_THREAD, 1);
+		return (0);
+	}
+	return (1);
 }

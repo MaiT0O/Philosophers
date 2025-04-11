@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:53 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/08 16:49:46 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/11 17:09:31 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	init_data(t_data *data, int argc, char **argv)
 {
-	struct timeval tv;
+	struct timeval	tv;
 
 	data->philo_count = ft_atoi_custom(argv[1]);
 	data->time_to_die = ft_atoi_custom(argv[2]);
@@ -51,7 +51,7 @@ void	data_philo_init(t_data *data, int i)
 
 int	init_philosophers(t_data *data)
 {
-	int i;
+	int	i;
 
 	data->philos = (t_philo *)malloc(sizeof(t_philo) * data->philo_count);
 	if (!data->philos)
@@ -61,22 +61,14 @@ int	init_philosophers(t_data *data)
 	}
 	i = -1;
 	if (data->philo_count == 1)
-	{
-		data_philo_init(data, 0);
-		if (pthread_create(&data->philos[0].thread, NULL,
-			alone_philosophe_routine, &data->philos[0]) != 0)
-		{
-			printf("%s %d.\n", ERR_THREAD, i + 1);
-			return (0);
-		}
-	}
+		return (init_alone_philo(data));
 	else
 	{
 		while (++i < data->philo_count)
 		{
 			data_philo_init(data, i);
 			if (pthread_create(&data->philos[i].thread, NULL,
-				philosopher_routine, &data->philos[i]) != 0)
+					philosopher_routine, &data->philos[i]) != 0)
 			{
 				printf("%s %d.\n", ERR_THREAD, i + 1);
 				return (0);
@@ -88,10 +80,10 @@ int	init_philosophers(t_data *data)
 
 int	init_mutexes(t_data *data)
 {
-	int i;
+	int	i;
 
 	data->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
-		 * data->philo_count);
+			* data->philo_count);
 	data->print = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	if (!data->forks || !data->print)
 	{
@@ -117,7 +109,7 @@ int	init_mutexes(t_data *data)
 
 int	main(int argc, char **argv)
 {
-	t_data data;
+	t_data	data;
 
 	if (argc < 5 || argc > 6)
 	{

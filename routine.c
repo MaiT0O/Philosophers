@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:56 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/08 16:50:41 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/11 17:31:58 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	philosopher_think(t_philo *philo)
 		if (time_to_think == 0)
 			time_to_think = 1;
 		pthread_mutex_lock(philo->data->print);
-		printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_THINKING);
+		printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_THINKING);
 		pthread_mutex_unlock(philo->data->print);
 		usleep(time_to_think * 1000);
 	}
@@ -38,7 +38,7 @@ void	philosopher_sleep(t_philo *philo)
 	if (philo->data->simulation_running)
 	{
 		pthread_mutex_lock(philo->data->print);
-		printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_SLEEPING);
+		printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_SLEEPING);
 		pthread_mutex_unlock(philo->data->print);
 		usleep(philo->data->time_to_sleep * 1000);
 	}
@@ -50,8 +50,9 @@ void	philosopher_eat(t_philo *philo)
 	if (philo->data->simulation_running)
 	{
 		pthread_mutex_lock(philo->data->print);
-		printf("philophe[%d] hasn't eat since %ld ms\n", philo->id, get_time_ms() - philo->last_eat);
-		printf("%ld %d %s\n", get_time_ms(), philo->id, MSG_EATING);
+		printf("philophe[%d] hasn't eat since %ld ms\n", philo->id,
+			 get_time_ms() - philo->last_eat);
+		printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_EATING);
 		pthread_mutex_unlock(philo->data->print);
 		philo->last_eat = get_time_ms();
 		philo->eat_count++;
@@ -73,10 +74,12 @@ void	*monitor_routine(void *arg)
 		while (++i < data->philo_count)
 		{
 			if (data->philo_full == data->philo_count)
-				stop_sim(data, 1);
+			{
+				data->simulation_running = 0;
+				print_meal(data);
+				return (NULL);
+			}
 			else if (is_dead(&data->philos[i]))
-				stop_sim(data, 0);
-			if (!data->simulation_running)
 				return (NULL);
 		}
 		usleep(1000);
@@ -88,26 +91,21 @@ void	*philosopher_routine(void *arg)
 {
 	t_philo *philo = (t_philo *)arg;
 
-	while (philo->data->simulation_running)
+	while (philo->data->simulation_running && !philo->death)
 	{
-		if (!philo->data->simulation_running)
+		if (!philo->data->simulation_running || philo->death)
 			break;
 		take_forks(philo);
-		if (!philo->data->simulation_running)
-		{
-			release_forks(philo);
+		if (!philo->data->simulation_running || philo->death)
 			break;
-		}
 		philosopher_eat(philo);
 		release_forks(philo);
-		if (!philo->data->simulation_running)
+		if (!philo->data->simulation_running || philo->death)
 			break;
 		philosopher_think(philo);
-		if (!philo->data->simulation_running)
+		if (!philo->data->simulation_running || philo->death)
 			break;
 		philosopher_sleep(philo);
 	}
-	if (philo->death == 1)
-		print_death(philo);
 	return (NULL);
 }

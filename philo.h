@@ -50,16 +50,25 @@ int		validate_arguments(int argc, char **argv);
 
 /*utils2.c*/
 int		is_dead(t_philo *philo);
-void	print_death(t_philo *philo);
 long	get_time_ms(void);
+long	correct_time(t_data *data);
 int		create_monitor_thread(t_data *data);
-void	stop_sim(t_data *data, int flag);
+int		init_alone_philo(t_data *data);
 
 /*routine.c*/
 void	*philosopher_routine(void *arg);
 void	*monitor_routine(void *arg);
 void	philosopher_think(t_philo *philo);
 void	philosopher_sleep(t_philo *philo);
+
+/*print.c*/
+void	print_fork(t_philo *philo);
+void	print_think(t_philo *philo, int index);
+void	print_death(t_philo *philo);
+void	print_meal(t_data *data);
+
+/*main.c*/
+void	data_philo_init(t_data *data, int i);
 
 // Messages pour les philosophes
 #define MSG_TAKE_FORK "has taken a fork"

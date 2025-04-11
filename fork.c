@@ -1,10 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   fork.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/11 12:56:17 by ebansse           #+#    #+#             */
+/*   Updated: 2025/04/11 17:29:09 by ebansse          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
-void	print_fork(t_philo *philo)
+void	release_forks(t_philo *philo)
 {
-	pthread_mutex_lock(philo->data->print);
-	printf("%ld %d %s\n",get_time_ms(), philo->id, MSG_TAKE_FORK);
-	pthread_mutex_unlock(philo->data->print);
+	pthread_mutex_unlock(&philo->data->forks[philo->right_fork]);
+	pthread_mutex_unlock(&philo->data->forks[philo->left_fork]);
 }
 
 int	safe_forks(t_philo *philo, int flag)
@@ -19,16 +30,22 @@ int	safe_forks(t_philo *philo, int flag)
 			pthread_mutex_unlock(&philo->data->forks[philo->right_fork]);
 		else if (philo->id % 2 != 0 && flag == 1)
 			release_forks(philo);
-		printf("philo[%d] release fork\n", philo->id);
 		return (0);
 	}
 	return (1);
 }
 
-void	release_forks(t_philo *philo)
+int	touch_fork(t_philo *philo, int left_fork, int right_fork)
 {
-	pthread_mutex_unlock(&philo->data->forks[philo->right_fork]);
-	pthread_mutex_unlock(&philo->data->forks[philo->left_fork]);
+	print_think(philo, left_fork);
+	if (!safe_forks(philo, 0))
+		return (0);
+	print_fork(philo);
+	print_think(philo, right_fork);
+	if (!safe_forks(philo, 1))
+		return (0);
+	print_fork(philo);
+	return (1);
 }
 
 void	take_forks(t_philo *philo)
@@ -37,25 +54,11 @@ void	take_forks(t_philo *philo)
 	{
 		if (philo->id % 2 == 0)
 		{
-			pthread_mutex_lock(&philo->data->forks[philo->left_fork]);
-			if (!safe_forks(philo, 0))
-				return ;
-			print_fork(philo);
-			pthread_mutex_lock(&philo->data->forks[philo->right_fork]);
-			if (!safe_forks(philo, 1))
-				return ;
-			print_fork(philo);
+			touch_fork(philo, philo->left_fork, philo->right_fork);
 		}
 		else
 		{
-			pthread_mutex_lock(&philo->data->forks[philo->right_fork]);
-			if (!safe_forks(philo, 0))
-				return ;
-			print_fork(philo);
-			pthread_mutex_lock(&philo->data->forks[philo->left_fork]);
-			if (!safe_forks(philo, 1))
-				return ;
-			print_fork(philo);
+			touch_fork(philo, philo->right_fork, philo->left_fork);	
 		}
 	}
 }
@@ -70,6 +73,7 @@ void	*alone_philosophe_routine(void *arg)
 	philosopher_sleep(philo);
 	while (philo->death == 0)
 		usleep(1000);
+	pthread_mutex_unlock(&philo->data->forks[0]);
 	print_death(philo);
 	return (NULL);
 }

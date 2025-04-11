@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:23:01 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/08 14:58:02 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/11 15:19:34 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,23 @@ long	ft_atoi_custom(const char *str)
 	return (res);
 }
 
+int	validate_arguments(int argc, char **argv)
+{
+	int i;
+
+	i = 1;
+	while (i < argc)
+	{
+		if (ft_atoi_custom(argv[i]) <= 0)
+		{
+			printf("%s\n", ERR_INVALID_ARGS);
+			return (0);
+		}
+		i++;
+	}
+	return (1);
+}
+
 int	free_all(t_data *data, int flag)
 {
 	int i;
@@ -86,7 +103,8 @@ int	free_all(t_data *data, int flag)
 void	end(t_data *data)
 {
 	int i;
-		i = 0;
+	
+	i = 0;
 	while (i < data->philo_count)
 	{
 		pthread_join(data->philos[i].thread, NULL);
@@ -95,20 +113,4 @@ void	end(t_data *data)
 	pthread_join(data->monitor_thread, NULL);
 	free_all(data, 0);
 	return ;
-}
-
-int	validate_arguments(int argc, char **argv)
-{
-	int i;
-		i = 1;
-	while (i < argc)
-	{
-		if (ft_atoi_custom(argv[i]) <= 0)
-		{
-			printf("%s\n", ERR_INVALID_ARGS);
-			return (0);
-		}
-		i++;
-	}
-	return (1);
 }

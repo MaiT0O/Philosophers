@@ -13,7 +13,7 @@
 # Variables
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -pthread
-SRCS = main.c routine.c utils.c utils2.c fork.c
+SRCS = main.c routine.c utils.c utils2.c fork.c print.c
 OBJS = $(SRCS:.c=.o)
 NAME = philo
 
