@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:56 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/11 17:31:58 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/14 15:53:32 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,10 @@ void	*philosopher_routine(void *arg)
 			break;
 		take_forks(philo);
 		if (!philo->data->simulation_running || philo->death)
+		{
+			release_forks(philo);
 			break;
+		}
 		philosopher_eat(philo);
 		release_forks(philo);
 		if (!philo->data->simulation_running || philo->death)

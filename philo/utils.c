@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:23:01 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/11 15:19:34 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/14 16:35:21 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,8 +83,9 @@ int	free_all(t_data *data, int flag)
 		while (++i < data->philo_count)
 			pthread_mutex_destroy(&data->forks[i]);
 		free(data->forks);
-		data->forks = NULL;
 	}
+	if (data->fork)
+		free(data->fork);
 	if (data->print)
 	{
 		pthread_mutex_destroy(data->print);
@@ -93,12 +94,10 @@ int	free_all(t_data *data, int flag)
 	if (flag == 1)
 		return (1);
 	if (data->philos)
-	{
 		free(data->philos);
-		data->philos = NULL;
-	}
 	return (1);
 }
+
 
 void	end(t_data *data)
 {
@@ -108,7 +107,7 @@ void	end(t_data *data)
 	while (i < data->philo_count)
 	{
 		pthread_join(data->philos[i].thread, NULL);
-		i++;
+		i++; 
 	}
 	pthread_join(data->monitor_thread, NULL);
 	free_all(data, 0);

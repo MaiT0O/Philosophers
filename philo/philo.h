@@ -31,6 +31,7 @@ typedef struct s_data
 	int				philo_full;
 	long			start;
 	int				simulation_running;
+	int				*fork;
 	pthread_mutex_t	*print;
 	pthread_mutex_t	*forks;
 	pthread_t		monitor_thread;

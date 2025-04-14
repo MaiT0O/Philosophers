@@ -6,11 +6,43 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:53 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/11 17:09:31 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/14 16:27:43 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+int	init_array_fork(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	data->fork = (int *)malloc(sizeof(int) * data->philo_count);
+	if (!data->fork)
+	{
+		printf("%s\n", ERR_MEMORY_ALLOC);
+		return (0);
+	}
+	while (i < data->philo_count)
+	{
+		data->fork[i] = 1;
+		i++;
+	}
+
+	// Affichage optionnel du tableau
+	pthread_mutex_lock(data->print);
+	i = 0;
+	while (i < data->philo_count)
+	{
+		printf("%d\t", data->fork[i]);
+		i++;
+	}
+	printf("\n");
+	pthread_mutex_unlock(data->print);
+
+	return (1);
+}
+
 
 int	init_data(t_data *data, int argc, char **argv)
 {
@@ -26,6 +58,7 @@ int	init_data(t_data *data, int argc, char **argv)
 		data->must_eat_count = INT_MIN;
 	data->philo_full = 0;
 	data->simulation_running = 1;
+	data->fork = NULL;
 	data->forks = NULL;
 	data->philos = NULL;
 	if (gettimeofday(&tv, NULL) != 0)
@@ -122,6 +155,8 @@ int	main(int argc, char **argv)
 		return (0);
 	if (!init_mutexes(&data))
 		return (free_all(&data, 1));
+	if (!init_array_fork(&data))
+		return (0);
 	if (!init_philosophers(&data))
 		return (free_all(&data, 0));
 	if (!create_monitor_thread(&data))
