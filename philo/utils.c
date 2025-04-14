@@ -58,7 +58,7 @@ long	ft_atoi_custom(const char *str)
 
 int	validate_arguments(int argc, char **argv)
 {
-	int i;
+	int	i;
 
 	i = 1;
 	while (i < argc)
@@ -75,8 +75,12 @@ int	validate_arguments(int argc, char **argv)
 
 int	free_all(t_data *data, int flag)
 {
-	int i;
+	int	i;
 
+	if (data->fork)
+		free(data->fork);
+	if (flag == 1)
+		return (1);
 	if (data->forks)
 	{
 		i = -1;
@@ -84,30 +88,23 @@ int	free_all(t_data *data, int flag)
 			pthread_mutex_destroy(&data->forks[i]);
 		free(data->forks);
 	}
-	if (data->fork)
-		free(data->fork);
-	if (data->print)
-	{
-		pthread_mutex_destroy(data->print);
-		free(data->print);
-	}
-	if (flag == 1)
+	pthread_mutex_destroy(&data->print);
+	if (flag == 2)
 		return (1);
 	if (data->philos)
 		free(data->philos);
 	return (1);
 }
 
-
 void	end(t_data *data)
 {
-	int i;
-	
+	int	i;
+
 	i = 0;
 	while (i < data->philo_count)
 	{
 		pthread_join(data->philos[i].thread, NULL);
-		i++; 
+		i++;
 	}
 	pthread_join(data->monitor_thread, NULL);
 	free_all(data, 0);

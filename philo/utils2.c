@@ -12,6 +12,17 @@
 
 #include "philo.h"
 
+int	is_full(t_data *data)
+{
+	if (data->philo_full == data->philo_count)
+	{
+		data->simulation_running = 0;
+		print_meal(data);
+		return (1);
+	}
+	return (0);
+}
+
 int	is_dead(t_philo *philo)
 {
 	long	current_time;
@@ -33,8 +44,8 @@ int	is_dead(t_philo *philo)
 
 long	get_time_ms(void)
 {
-	struct timeval tv;
-	long	res;
+	struct timeval	tv;
+	long			res;
 
 	if (gettimeofday(&tv, NULL) != 0)
 	{
@@ -52,27 +63,4 @@ long	correct_time(t_data *data)
 	time = get_time_ms();
 	time = time - data->start;
 	return (time);
-}
-
-int	create_monitor_thread(t_data *data)
-{
-	if (pthread_create(&data->monitor_thread, NULL,
-		 monitor_routine, data) != 0)
-	{
-		printf("Error: Failed to create monitor thread.\n");
-		return (0);
-	}
-	return (1);
-}
-
-int	init_alone_philo(t_data *data)
-{
-	data_philo_init(data, 0);
-	if (pthread_create(&data->philos[0].thread, NULL,
-			alone_philosophe_routine, &data->philos[0]) != 0)
-	{
-		printf("%s %d.\n", ERR_THREAD, 1);
-		return (0);
-	}
-	return (1);
 }

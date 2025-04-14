@@ -1,12 +1,12 @@
 #ifndef PHILO_H
 # define PHILO_H
 
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <limits.h>
+# include <pthread.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <sys/time.h>
+# include <limits.h>
 
 typedef struct s_philo
 {
@@ -32,7 +32,7 @@ typedef struct s_data
 	long			start;
 	int				simulation_running;
 	int				*fork;
-	pthread_mutex_t	*print;
+	pthread_mutex_t	print;
 	pthread_mutex_t	*forks;
 	pthread_t		monitor_thread;
 	t_philo			*philos;
@@ -41,20 +41,18 @@ typedef struct s_data
 /*fork.c*/
 void	release_forks(t_philo *philo);
 void	take_forks(t_philo *philo);
-void	*alone_philosophe_routine(void *arg);
 
 /*utils.c.*/
 long	ft_atoi_custom(const char *str);
+int		validate_arguments(int argc, char **argv);
 int		free_all(t_data *data, int flag);
 void	end(t_data *data);
-int		validate_arguments(int argc, char **argv);
 
 /*utils2.c*/
 int		is_dead(t_philo *philo);
+int		is_full(t_data *data);
 long	get_time_ms(void);
 long	correct_time(t_data *data);
-int		create_monitor_thread(t_data *data);
-int		init_alone_philo(t_data *data);
 
 /*routine.c*/
 void	*philosopher_routine(void *arg);
@@ -64,24 +62,30 @@ void	philosopher_sleep(t_philo *philo);
 
 /*print.c*/
 void	print_fork(t_philo *philo);
-void	print_think(t_philo *philo, int index);
 void	print_death(t_philo *philo);
 void	print_meal(t_data *data);
+
+/*init.c*/
+int		init_alone_philo(t_data *data);
+void	*alone_philosophe_routine(void *arg);
+int		create_monitor_thread(t_data *data);
+int		init_array_fork(t_data *data);
 
 /*main.c*/
 void	data_philo_init(t_data *data, int i);
 
 // Messages pour les philosophes
-#define MSG_TAKE_FORK "has taken a fork"
-#define MSG_EATING "is eating"
-#define MSG_SLEEPING "is sleeping"
-#define MSG_THINKING "is thinking"
-#define MSG_DIED "died"
+# define MSG_TAKE_FORK "has taken a fork"
+# define MSG_EATING "is eating"
+# define MSG_SLEEPING "is sleeping"
+# define MSG_THINKING "is thinking"
+# define MSG_DIED "died"
 
 // Autres messages
-#define ERR_INVALID_ARGS "Error: Invalid arguments. All values must be positive integers."
-#define ERR_MEMORY_ALLOC "Error: Failed to allocate memory."
-#define USAGE "Usage: ./philosophers number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]"
-#define ERR_THREAD "Error: Failed to create thread for philosopher"
+# define ERR_INVALID_ARGS "Error: Invalid arguments."
+# define ERR_MEMORY_ALLOC "Error: Failed to allocate memory."
+# define ERR_MUTEXES "Error: Failed to initialize mutex."
+# define USAGE "Usage: ./philo number_of_philo die_in_ms eat_in_ms sleep_in_ms"
+# define ERR_THREAD "Error: Failed to create thread"
 
 #endif

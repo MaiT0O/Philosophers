@@ -14,36 +14,23 @@
 
 void	print_fork(t_philo *philo)
 {
-	pthread_mutex_lock(philo->data->print);
-	printf("%ld %d %s\n",correct_time(philo->data), philo->id, MSG_TAKE_FORK);
-	pthread_mutex_unlock(philo->data->print);
-}
-
-void	*alone_philosophe_routine(void *arg)
-{
-	t_philo *philo = (t_philo *)arg;
-
-	pthread_mutex_lock(&philo->data->forks[0]);
-	print_fork(philo);
-	philosopher_think(philo);
-	philosopher_sleep(philo);
-	while (philo->death == 0)
-		usleep(1000);
-	pthread_mutex_unlock(&philo->data->forks[0]);
-	return (NULL);
+	pthread_mutex_lock(&philo->data->print);
+	printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_TAKE_FORK);
+	pthread_mutex_unlock(&philo->data->print);
 }
 
 void	print_death(t_philo *philo)
 {
-	pthread_mutex_lock(philo->data->print);
-	printf("%ld philophe[%d] hasn't eat since %ld ms\n", correct_time(philo->data), philo->id, philo->death_time);
+	pthread_mutex_lock(&philo->data->print);
+	printf("%ld philophe[%d] hasn't eat since %ld ms\n",
+		correct_time(philo->data), philo->id, philo->death_time);
 	printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_DIED);
-	pthread_mutex_unlock(philo->data->print);
+	pthread_mutex_unlock(&philo->data->print);
 }
 
 void	print_meal(t_data *data)
 {
-    pthread_mutex_lock(data->print);
-    printf("all philosophers have had enough to eat\n");
-    pthread_mutex_unlock(data->print);
+	pthread_mutex_lock(&data->print);
+	printf("all philosophers have had enough to eat\n");
+	pthread_mutex_unlock(&data->print);
 }

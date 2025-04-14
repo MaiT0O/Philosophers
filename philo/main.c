@@ -12,38 +12,6 @@
 
 #include "philo.h"
 
-int	init_array_fork(t_data *data)
-{
-	int	i;
-
-	i = 0;
-	data->fork = (int *)malloc(sizeof(int) * data->philo_count);
-	if (!data->fork)
-	{
-		printf("%s\n", ERR_MEMORY_ALLOC);
-		return (0);
-	}
-	while (i < data->philo_count)
-	{
-		data->fork[i] = 1;
-		i++;
-	}
-
-	// Affichage optionnel du tableau
-	pthread_mutex_lock(data->print);
-	i = 0;
-	while (i < data->philo_count)
-	{
-		printf("%d\t", data->fork[i]);
-		i++;
-	}
-	printf("\n");
-	pthread_mutex_unlock(data->print);
-
-	return (1);
-}
-
-
 int	init_data(t_data *data, int argc, char **argv)
 {
 	struct timeval	tv;
@@ -89,7 +57,7 @@ int	init_philosophers(t_data *data)
 	data->philos = (t_philo *)malloc(sizeof(t_philo) * data->philo_count);
 	if (!data->philos)
 	{
-		printf("%s for philosophers.\n", ERR_MEMORY_ALLOC);
+		printf("%s\n", ERR_MEMORY_ALLOC);
 		return (0);
 	}
 	i = -1;
@@ -117,10 +85,9 @@ int	init_mutexes(t_data *data)
 
 	data->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
 			* data->philo_count);
-	data->print = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
-	if (!data->forks || !data->print)
+	if (!data->forks)
 	{
-		printf("%s for forks.\n", ERR_MEMORY_ALLOC);
+		printf("%s\n", ERR_MEMORY_ALLOC);
 		return (0);
 	}
 	i = -1;
@@ -128,13 +95,13 @@ int	init_mutexes(t_data *data)
 	{
 		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
 		{
-			free_all(data, 1);
+			printf("%s\n", ERR_MUTEXES);
 			return (0);
 		}
 	}
-	if (pthread_mutex_init(data->print, NULL) != 0)
+	if (pthread_mutex_init(&data->print, NULL) != 0)
 	{
-		printf("Error: Failed to initialize mutex.\n");
+		printf("%s\n", ERR_MUTEXES);
 		return (0);
 	}
 	return (1);
@@ -153,10 +120,10 @@ int	main(int argc, char **argv)
 		return (0);
 	if (!init_data(&data, argc, argv))
 		return (0);
-	if (!init_mutexes(&data))
-		return (free_all(&data, 1));
 	if (!init_array_fork(&data))
-		return (0);
+		return (free_all(&data, 1));
+	if (!init_mutexes(&data))
+		return (free_all(&data, 2));
 	if (!init_philosophers(&data))
 		return (free_all(&data, 0));
 	if (!create_monitor_thread(&data))
