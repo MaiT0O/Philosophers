@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:56 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/14 15:53:32 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/15 12:55:51 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	philosopher_think(t_philo *philo)
 {
 	long	time_to_think;
 
-	if (philo->data->simulation_running)
+	if (philo->data->simulation_running && !philo->death)
 	{
 		time_to_think = (philo->data->time_to_die - (get_time_ms()
 					- philo->last_eat) - philo->data->time_to_eat
@@ -36,7 +36,7 @@ void	philosopher_think(t_philo *philo)
 
 void	philosopher_sleep(t_philo *philo)
 {
-	if (philo->data->simulation_running)
+	if (philo->data->simulation_running && !philo->death)
 	{
 		pthread_mutex_lock(&philo->data->print);
 		printf("%ld %d %s\n", correct_time(philo->data),
@@ -49,14 +49,11 @@ void	philosopher_sleep(t_philo *philo)
 
 void	philosopher_eat(t_philo *philo)
 {
-	if (philo->data->simulation_running)
+	if (philo->data->simulation_running && !philo->death)
 	{
 		philo->eat_count++;
 		pthread_mutex_lock(&philo->data->print);
-		printf("philophe[%d] hasn't eat since %ld ms\n", philo->id,
-			get_time_ms() - philo->last_eat);
 		printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_EATING);
-		printf("count philo is %d\n", philo->data->philo_count);
 		pthread_mutex_unlock(&philo->data->print);
 		philo->last_eat = get_time_ms();
 		usleep(philo->data->time_to_eat * 1000);
@@ -72,15 +69,14 @@ void	*monitor_routine(void *arg)
 	int		i;
 
 	data = (t_data *)arg;
-	i = -1;
-	while (1)
+	while (data->simulation_running)
 	{
-		while (++i < data->philo_count)
+		i = 0;
+		while (i < data->philo_count && data->simulation_running)
 		{
-			if (is_full(data))
+			if (is_full(data) || is_dead(&data->philos[i]))
 				return (NULL);
-			else if (is_dead(&data->philos[i]))
-				return (NULL);
+			i++;
 		}
 		usleep(1000);
 	}
@@ -92,7 +88,7 @@ void	*philosopher_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (philo->data->simulation_running == 1 && !philo->death)
+	while (philo->data->simulation_running && !philo->death)
 	{
 		if (!philo->data->simulation_running || philo->death)
 			break ;

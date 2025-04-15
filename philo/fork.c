@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 12:56:17 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/14 15:52:14 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/15 12:40:32 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	print_think(t_philo *philo, int index)
 			pthread_mutex_unlock(&philo->data->print);
 			printed = 1;
 		}
-		usleep(10000);
+		usleep(1000);
 	}
 }
 
