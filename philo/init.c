@@ -12,25 +12,6 @@
 
 #include "philo.h"
 
-int	init_array_fork(t_data *data)
-{
-	int	i;
-
-	i = 0;
-	data->fork = (int *)malloc(sizeof(int) * data->philo_count);
-	if (!data->fork)
-	{
-		printf("%s\n", ERR_MEMORY_ALLOC);
-		return (0);
-	}
-	while (i < data->philo_count)
-	{
-		data->fork[i] = 1;
-		i++;
-	}
-	return (1);
-}
-
 int	init_alone_philo(t_data *data)
 {
 	data_philo_init(data, 0);
@@ -52,7 +33,7 @@ void	*alone_philosophe_routine(void *arg)
 	print_fork(philo);
 	philosopher_think(philo);
 	philosopher_sleep(philo);
-	while (philo->death == 0)
+	while (philo->data->simulation_running == 0)
 		usleep(1000);
 	pthread_mutex_unlock(&philo->data->forks[0]);
 	return (NULL);

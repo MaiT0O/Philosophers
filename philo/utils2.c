@@ -32,9 +32,6 @@ int	is_dead(t_philo *philo)
 	time_since_last_meal = current_time - philo->last_eat;
 	if (time_since_last_meal > philo->data->time_to_die)
 	{
-		philo->death = 1;
-		philo->death_time = time_since_last_meal;
-		usleep(10000);
 		philo->data->simulation_running = 0;
 		print_death(philo);
 		return (1);

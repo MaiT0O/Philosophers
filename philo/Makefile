@@ -29,7 +29,6 @@ RESET = \033[0m
 
 # Rules
 all: $(NAME)
-	@${MAKE} --no-print-directory clean
 
 $(NAME): $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
@@ -47,4 +46,3 @@ fclean: clean
 	@echo "${MAGENTA}Binaries cleaned!${RESET}"
 
 re: fclean all
-	@${MAKE} --no-print-directory clean

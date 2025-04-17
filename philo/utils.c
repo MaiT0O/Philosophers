@@ -77,19 +77,17 @@ int	free_all(t_data *data, int flag)
 {
 	int	i;
 
-	if (data->fork)
-		free(data->fork);
-	if (flag == 1)
-		return (1);
-	if (data->forks)
+	i = -1;
+	while (++i < data->philo_count)
 	{
-		i = -1;
-		while (++i < data->philo_count)
-			pthread_mutex_destroy(&data->forks[i]);
-		free(data->forks);
+		pthread_mutex_destroy(&data->forks[i]);
+		pthread_mutex_destroy(&data->philos[i].last_eat_mutex);
 	}
+	free(data->forks);
 	pthread_mutex_destroy(&data->print);
-	if (flag == 2)
+	pthread_mutex_destroy(&data->simulation_mutex);
+	pthread_mutex_destroy(&data->philo_full_mutex);
+	if (flag == 1)
 		return (1);
 	if (data->philos)
 		free(data->philos);

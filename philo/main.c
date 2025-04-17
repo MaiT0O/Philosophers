@@ -26,7 +26,6 @@ int	init_data(t_data *data, int argc, char **argv)
 		data->must_eat_count = INT_MIN;
 	data->philo_full = 0;
 	data->simulation_running = 1;
-	data->fork = NULL;
 	data->forks = NULL;
 	data->philos = NULL;
 	if (gettimeofday(&tv, NULL) != 0)
@@ -38,16 +37,26 @@ int	init_data(t_data *data, int argc, char **argv)
 	return (1);
 }
 
-void	data_philo_init(t_data *data, int i)
+int	data_philo_init(t_data *data, int i)
 {
-	data->philos[i].death = 0;
-	data->philos[i].death_time = 0;
 	data->philos[i].id = i + 1;
 	data->philos[i].left_fork = i;
 	data->philos[i].right_fork = (i + 1) % data->philo_count;
 	data->philos[i].eat_count = 0;
 	data->philos[i].last_eat = get_time_ms();
 	data->philos[i].data = data;
+	if (pthread_mutex_init(&data->philos[i].last_eat_mutex, NULL) != 0)
+	{
+		printf("%s %d.\n", ERR_MUTEXES, i + 1);
+    	return (0);
+	}
+	if (pthread_create(&data->philos[i].thread, NULL,
+		philosopher_routine, &data->philos[i]) != 0)
+	{
+		printf("%s %d.\n", ERR_THREAD, i + 1);
+		return (0);
+	}
+	return (1);
 }
 
 int	init_philosophers(t_data *data)
@@ -67,13 +76,8 @@ int	init_philosophers(t_data *data)
 	{
 		while (++i < data->philo_count)
 		{
-			data_philo_init(data, i);
-			if (pthread_create(&data->philos[i].thread, NULL,
-					philosopher_routine, &data->philos[i]) != 0)
-			{
-				printf("%s %d.\n", ERR_THREAD, i + 1);
+			if (!data_philo_init(data, i))
 				return (0);
-			}
 		}
 	}
 	return (1);
@@ -99,7 +103,9 @@ int	init_mutexes(t_data *data)
 			return (0);
 		}
 	}
-	if (pthread_mutex_init(&data->print, NULL) != 0)
+	if (pthread_mutex_init(&data->print, NULL) != 0 ||
+			pthread_mutex_init(&data->simulation_mutex, NULL) != 0 ||
+			pthread_mutex_init(&data->philo_full_mutex, NULL) != 0)
 	{
 		printf("%s\n", ERR_MUTEXES);
 		return (0);
@@ -120,10 +126,8 @@ int	main(int argc, char **argv)
 		return (0);
 	if (!init_data(&data, argc, argv))
 		return (0);
-	if (!init_array_fork(&data))
-		return (free_all(&data, 1));
 	if (!init_mutexes(&data))
-		return (free_all(&data, 2));
+		return (free_all(&data, 1));
 	if (!init_philosophers(&data))
 		return (free_all(&data, 0));
 	if (!create_monitor_thread(&data))

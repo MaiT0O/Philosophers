@@ -26,8 +26,7 @@ typedef struct s_philo
 	int				left_fork;
 	int				right_fork;
 	int				eat_count;
-	int				death;
-	long			death_time;
+	pthread_mutex_t	last_eat_mutex;
 	long			last_eat;
 	pthread_t		thread;
 	struct s_data	*data;
@@ -40,12 +39,13 @@ typedef struct s_data
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				must_eat_count;
+	pthread_mutex_t	philo_full_mutex;
 	int				philo_full;
 	long			start;
-	int				simulation_running;
-	int				*fork;
 	pthread_mutex_t	print;
 	pthread_mutex_t	*forks;
+	pthread_mutex_t	simulation_mutex;
+	int				simulation_running;
 	pthread_t		monitor_thread;
 	t_philo			*philos;
 }				t_data;
@@ -84,7 +84,7 @@ int		create_monitor_thread(t_data *data);
 int		init_array_fork(t_data *data);
 
 /*main.c*/
-void	data_philo_init(t_data *data, int i);
+int	data_philo_init(t_data *data, int i);
 
 // Messages pour les philosophes
 # define MSG_TAKE_FORK "has taken a fork"
