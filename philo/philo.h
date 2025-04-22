@@ -86,6 +86,14 @@ int		init_array_fork(t_data *data);
 /*main.c*/
 int	data_philo_init(t_data *data, int i);
 
+/*get.c*/
+int		is_simulation_running(t_data *data);
+void	stop_simulation(t_data *data);
+int		get_philo_full(t_data *data);
+void	increment_philo_full(t_data *data);
+long	get_last_eat(t_philo *philo);
+void	set_last_eat(t_philo *philo);
+
 // Messages pour les philosophes
 # define MSG_TAKE_FORK "has taken a fork"
 # define MSG_EATING "is eating"

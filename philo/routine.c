@@ -16,7 +16,7 @@ void	philosopher_think(t_philo *philo)
 {
 	long	time_to_think;
 
-	if (philo->data->simulation_running)
+	if (is_simulation_running(philo->data))
 	{
 		pthread_mutex_lock(&philo->data->print);
 		printf("%ld %d %s\n", correct_time(philo->data),
@@ -28,7 +28,7 @@ void	philosopher_think(t_philo *philo)
 
 void	philosopher_sleep(t_philo *philo)
 {
-	if (philo->data->simulation_running)
+	if (is_simulation_running(philo->data))
 	{
 		pthread_mutex_lock(&philo->data->print);
 		printf("%ld %d %s\n", correct_time(philo->data),
@@ -41,16 +41,16 @@ void	philosopher_sleep(t_philo *philo)
 
 void	philosopher_eat(t_philo *philo)
 {
-	if (philo->data->simulation_running)
+	if (is_simulation_running(philo->data))
 	{
 		philo->eat_count++;
 		pthread_mutex_lock(&philo->data->print);
 		printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_EATING);
 		pthread_mutex_unlock(&philo->data->print);
-		philo->last_eat = get_time_ms();
+		set_last_eat(philo);
 		usleep(philo->data->time_to_eat * 1000);
 		if (philo->eat_count == philo->data->must_eat_count)
-			philo->data->philo_full++;
+			increment_philo_full(philo->data);
 	}
 	return ;
 }
@@ -61,10 +61,10 @@ void	*monitor_routine(void *arg)
 	int		i;
 
 	data = (t_data *)arg;
-	while (data->simulation_running)
+	while (is_simulation_running(data))
 	{
 		i = 0;
-		while (i < data->philo_count && data->simulation_running)
+		while (i < data->philo_count && is_simulation_running(data))
 		{
 			if (is_full(data) || is_dead(&data->philos[i]))
 				return (NULL);
@@ -80,20 +80,20 @@ void	*philosopher_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (philo->data->simulation_running)
+	while (is_simulation_running(philo->data))
 	{
 		philosopher_think(philo);
-		if (!philo->data->simulation_running)
+		if (!is_simulation_running(philo->data))
 			break ;
 		take_forks(philo);
-		if (!philo->data->simulation_running)
+		if (!is_simulation_running(philo->data))
 		{
 			release_forks(philo);
 			break ;
 		}
 		philosopher_eat(philo);
 		release_forks(philo);
-		if (!philo->data->simulation_running)
+		if (!is_simulation_running(philo->data))
 			break ;
 		philosopher_sleep(philo);
 	}

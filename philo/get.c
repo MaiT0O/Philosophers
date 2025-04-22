@@ -44,9 +44,9 @@ long	get_last_eat(t_philo *philo)
     return (last_eat);
 }
 
-void	set_last_eat(t_philo *philo, long last_eat)
+void	set_last_eat(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->last_eat_mutex);
-	philo->last_eat = last_eat;
+	philo->last_eat = get_time_ms();
 	pthread_mutex_unlock(&philo->last_eat_mutex);
 }

@@ -33,7 +33,7 @@ void	*alone_philosophe_routine(void *arg)
 	print_fork(philo);
 	philosopher_think(philo);
 	philosopher_sleep(philo);
-	while (philo->data->simulation_running == 0)
+	while (is_simulation_running(philo->data))
 		usleep(1000);
 	pthread_mutex_unlock(&philo->data->forks[0]);
 	return (NULL);

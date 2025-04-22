@@ -14,9 +14,9 @@
 
 int	is_full(t_data *data)
 {
-	if (data->philo_full == data->philo_count)
+	if (get_philo_full(data) == data->philo_count)
 	{
-		data->simulation_running = 0;
+		stop_simulation(data);
 		print_meal(data);
 		return (1);
 	}
@@ -29,10 +29,10 @@ int	is_dead(t_philo *philo)
 	long	time_since_last_meal;
 
 	current_time = get_time_ms();
-	time_since_last_meal = current_time - philo->last_eat;
+	time_since_last_meal = current_time - get_last_eat(philo);
 	if (time_since_last_meal > philo->data->time_to_die)
 	{
-		philo->data->simulation_running = 0;
+		stop_simulation(philo->data);
 		print_death(philo);
 		return (1);
 	}

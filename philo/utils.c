@@ -12,65 +12,85 @@
 
 #include "philo.h"
 
-int	atoi_verif(const char *str)
+int	is_valid_number(const char *str)
 {
-	int	i;
-	int	sign;
+    int	i;
+    int	sign_count;
 
-	i = 0;
-	sign = 0;
-	while (str[i] == ' ' || str[i] == '\n' || str[i] == '\t'
-		|| str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
-		i++;
-	while (str[i] == '-' || str[i] == '+')
-	{
-		sign++;
-		if (sign == 2)
-			return (-1);
-		i++;
-	}
-	if (str[i] < '0' || str[i] > '9')
-		return (-1);
-	return (i);
+    i = 0;
+    sign_count = 0;
+    while (str[i] == ' ' || str[i] == '\n' || str[i] == '\t'
+        || str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
+        i++;
+    while (str[i] == '-' || str[i] == '+')
+    {
+		if (sign_count > 1)
+			return(0);
+        sign_count++;
+        i++;
+    }
+    while (str[i])
+    {
+        if (str[i] < '0' || str[i] > '9')
+            return (0);
+        i++;
+    }
+    return (1);
 }
 
 long	ft_atoi_custom(const char *str)
 {
-	int		i;
-	long	res;
-	int		sign;
+    int		i;
+    long	res;
+    int		sign;
 
-	i = atoi_verif(str);
-	if (i == -1)
-		return (LONG_MIN);
-	res = 0;
-	sign = 1;
-	if (str[i - 1] == '-')
-		sign = -1;
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		res = (res * 10) + (str[i] - '0');
-		i++;
-	}
-	res = res * sign;
-	return (res);
+    i = 0;
+    res = 0;
+    sign = 1;
+    while (str[i] == ' ' || str[i] == '\n' || str[i] == '\t'
+        || str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
+        i++;
+    if (str[i] == '-' || str[i] == '+')
+    {
+        if (str[i] == '-')
+            sign = -1;
+        i++;
+    }
+    while (str[i] >= '0' && str[i] <= '9')
+    {
+        res = (res * 10) + (str[i] - '0');
+        if (res * sign > INT_MAX || res * sign < INT_MIN)
+            return (LONG_MIN);
+        i++;
+    }
+    return (res * sign);
 }
 
 int	validate_arguments(int argc, char **argv)
 {
-	int	i;
+    int		i;
+    long	value;
 
-	i = 1;
-	while (i < argc)
-	{
-		if (ft_atoi_custom(argv[i]) <= 0)
-		{
-			printf("%s\n", ERR_INVALID_ARGS);
-			return (0);
-		}
-		i++;
-	}
-	return (1);
+    i = 1;
+    while (i < argc)
+    {
+        // Vérifier si l'argument est un nombre valide
+        if (!is_valid_number(argv[i]))
+        {
+            printf("%s\n", ERR_INVALID_ARGS);
+            return (0);
+        }
+
+        // Convertir l'argument en entier et vérifier qu'il est > 0
+        value = ft_atoi_custom(argv[i]);
+        if (value <= 0 || value > INT_MAX)
+        {
+            printf("%s\n", ERR_INVALID_ARGS);
+            return (0);
+        }
+        i++;
+    }
+    return (1);
 }
 
 int	free_all(t_data *data, int flag)
