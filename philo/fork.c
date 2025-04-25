@@ -20,7 +20,7 @@ void	release_forks(t_philo *philo)
 
 int	safe_forks(t_philo *philo, int flag)
 {
-	if (is_running(philo->data))
+	if (!is_running(philo->data))
 	{
 		if (philo->id % 2 == 0 && flag == 0)
 		{

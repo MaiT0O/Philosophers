@@ -42,6 +42,7 @@ typedef struct s_data
 	int				die;
 	pthread_mutex_t	philo_full_mutex;
 	int				philo_full;
+	pthread_mutex_t start_mutex;
 	long			start;
 	pthread_mutex_t	print;
 	pthread_mutex_t	*forks;
@@ -82,10 +83,10 @@ void	print_meal(t_data *data);
 int		init_alone_philo(t_data *data);
 void	*alone_philosophe_routine(void *arg);
 int		create_monitor_thread(t_data *data);
-int		init_array_fork(t_data *data);
+int		init_list_philos(t_data *data);
 
 /*main.c*/
-int	data_philo_init(t_data *data, int i);
+int		data_philo_init(t_data *data, int i);
 
 /*get.c*/
 int		is_running(t_data *data);

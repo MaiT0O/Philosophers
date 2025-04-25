@@ -48,11 +48,14 @@ long	get_time_ms(void)
 	return (res);
 }
 
-long	correct_time(t_data *data)
+long correct_time(t_data *data)
 {
-	long	time;
+    long time;
 
-	time = get_time_ms();
-	time = time - data->start;
-	return (time);
+    pthread_mutex_lock(&data->start_mutex);
+    time = get_time_ms();
+    time = time - data->start;
+    pthread_mutex_unlock(&data->start_mutex);
+
+    return (time);
 }

@@ -14,8 +14,6 @@
 
 int	init_data(t_data *data, int argc, char **argv)
 {
-	struct timeval	tv;
-
 	data->philo_count = ft_atoi_custom(argv[1]);
 	data->time_to_die = ft_atoi_custom(argv[2]);
 	data->time_to_eat = ft_atoi_custom(argv[3]);
@@ -29,12 +27,22 @@ int	init_data(t_data *data, int argc, char **argv)
 	data->simulation_running = 1;
 	data->forks = NULL;
 	data->philos = NULL;
-	if (gettimeofday(&tv, NULL) != 0)
-	{
-		printf("Error: Failed to get current time.\n");
+	data->start = get_time_ms();
+	if (!init_list_philos(data))
 		return (0);
+	return (1);
+}
+
+int	init_philosophers(t_data *data)
+{
+	int	i;
+
+	i = -1;
+	while (++i < data->philo_count)
+	{
+		if (!data_philo_init(data, i))
+			return (0);
 	}
-	data->start = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 	return (1);
 }
 
@@ -51,30 +59,13 @@ int	data_philo_init(t_data *data, int i)
 		printf("%s %d.\n", ERR_MUTEXES, i + 1);
     	return (0);
 	}
-	if (pthread_create(&data->philos[i].thread, NULL,
+	if (data->philo_count == 1)
+		return (1);
+	else if (pthread_create(&data->philos[i].thread, NULL,
 		philosopher_routine, &data->philos[i]) != 0)
 	{
 		printf("%s %d.\n", ERR_THREAD, i + 1);
 		return (0);
-	}
-	return (1);
-}
-
-int	init_philosophers(t_data *data)
-{
-	int	i;
-
-	data->philos = (t_philo *)malloc(sizeof(t_philo) * data->philo_count);
-	if (!data->philos)
-	{
-		printf("%s\n", ERR_MEMORY_ALLOC);
-		return (0);
-	}
-	i = -1;
-	while (++i < data->philo_count)
-	{
-		if (!data_philo_init(data, i))
-			return (0);
 	}
 	return (1);
 }
@@ -101,7 +92,8 @@ int	init_mutexes(t_data *data)
 	}
 	if (pthread_mutex_init(&data->print, NULL) != 0 ||
 			pthread_mutex_init(&data->simulation_mutex, NULL) != 0 ||
-			pthread_mutex_init(&data->philo_full_mutex, NULL) != 0)
+			pthread_mutex_init(&data->philo_full_mutex, NULL) != 0 ||
+			pthread_mutex_init(&data->start_mutex, NULL) != 0)
 	{
 		printf("%s\n", ERR_MUTEXES);
 		return (0);

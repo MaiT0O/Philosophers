@@ -29,14 +29,12 @@ void	*alone_philosophe_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	pthread_mutex_lock(&philo->data->forks[0]);
-	print_fork(philo);
-	philosopher_think(philo);
+	printf("%ld 1 %s\n", correct_time(philo->data), MSG_TAKE_FORK);
+	printf("%ld 1 %s\n", correct_time(philo->data), MSG_THINKING);
 	philosopher_sleep(philo);
 	while (is_running(philo->data))
 		usleep(1000);
 	philo->data->die = 1;
-	pthread_mutex_unlock(&philo->data->forks[0]);
 	stop_simulation(philo);
 	end(philo->data);
 	return (NULL);
@@ -48,6 +46,17 @@ int	create_monitor_thread(t_data *data)
 			monitor_routine, data) != 0)
 	{
 		printf("Error: Failed to create monitor thread.\n");
+		return (0);
+	}
+	return (1);
+}
+
+int	init_list_philos(t_data *data)
+{
+	data->philos = (t_philo *)malloc(sizeof(t_philo) * (data->philo_count + 1));
+	if (!data->philos)
+	{
+		printf("%s\n", ERR_MEMORY_ALLOC);
 		return (0);
 	}
 	return (1);
