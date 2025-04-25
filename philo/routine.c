@@ -14,9 +14,7 @@
 
 void	philosopher_think(t_philo *philo)
 {
-	long	time_to_think;
-
-	if (is_simulation_running(philo->data))
+	if (is_running(philo->data))
 	{
 		pthread_mutex_lock(&philo->data->print);
 		printf("%ld %d %s\n", correct_time(philo->data),
@@ -28,7 +26,7 @@ void	philosopher_think(t_philo *philo)
 
 void	philosopher_sleep(t_philo *philo)
 {
-	if (is_simulation_running(philo->data))
+	if (is_running(philo->data))
 	{
 		pthread_mutex_lock(&philo->data->print);
 		printf("%ld %d %s\n", correct_time(philo->data),
@@ -41,7 +39,7 @@ void	philosopher_sleep(t_philo *philo)
 
 void	philosopher_eat(t_philo *philo)
 {
-	if (is_simulation_running(philo->data))
+	if (is_running(philo->data))
 	{
 		philo->eat_count++;
 		pthread_mutex_lock(&philo->data->print);
@@ -61,13 +59,18 @@ void	*monitor_routine(void *arg)
 	int		i;
 
 	data = (t_data *)arg;
-	while (is_simulation_running(data))
+	while (1)
 	{
+		if (!is_running(data))
+			break;
 		i = 0;
-		while (i < data->philo_count && is_simulation_running(data))
+		while (i < data->philo_count && is_running(data))
 		{
 			if (is_full(data) || is_dead(&data->philos[i]))
+			{
+				stop_simulation(&data->philos[i]);
 				return (NULL);
+			}
 			i++;
 		}
 		usleep(1000);
@@ -80,20 +83,20 @@ void	*philosopher_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (is_simulation_running(philo->data))
+	while (is_running(philo->data))
 	{
 		philosopher_think(philo);
-		if (!is_simulation_running(philo->data))
+		if (!is_running(philo->data))
 			break ;
 		take_forks(philo);
-		if (!is_simulation_running(philo->data))
+		if (!is_running(philo->data))
 		{
 			release_forks(philo);
 			break ;
 		}
 		philosopher_eat(philo);
 		release_forks(philo);
-		if (!is_simulation_running(philo->data))
+		if (!is_running(philo->data))
 			break ;
 		philosopher_sleep(philo);
 	}

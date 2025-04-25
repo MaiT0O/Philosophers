@@ -1,20 +1,26 @@
 #include "philo.h"
 
-int	is_simulation_running(t_data *data)
+int	is_running(t_data *data)
 {
-    int	running;
-
-    pthread_mutex_lock(&data->simulation_mutex);
-    running = data->simulation_running;
-    pthread_mutex_unlock(&data->simulation_mutex);
-    return (running);
+	pthread_mutex_lock(&data->simulation_mutex);
+	if (!data->simulation_running)
+		{
+			pthread_mutex_unlock(&data->simulation_mutex);
+			return (0);
+		}
+	pthread_mutex_unlock(&data->simulation_mutex);
+	return (1);
 }
 
-void	stop_simulation(t_data *data)
+void	stop_simulation(t_philo *philo)
 {
-    pthread_mutex_lock(&data->simulation_mutex);
-    data->simulation_running = 0;
-    pthread_mutex_unlock(&data->simulation_mutex);
+    pthread_mutex_lock(&philo->data->simulation_mutex);
+    philo->data->simulation_running = 0;
+    pthread_mutex_unlock(&philo->data->simulation_mutex);
+	if (philo->data->die == 1)
+		print_death(philo);
+	else if (philo->data->die == 0)
+		print_meal(philo->data);
 }
 
 int	get_philo_full(t_data *data)

@@ -20,6 +20,7 @@ int	init_data(t_data *data, int argc, char **argv)
 	data->time_to_die = ft_atoi_custom(argv[2]);
 	data->time_to_eat = ft_atoi_custom(argv[3]);
 	data->time_to_sleep = ft_atoi_custom(argv[4]);
+	data->die = 0;
 	if (argc == 6)
 		data->must_eat_count = ft_atoi_custom(argv[5]);
 	else
@@ -70,15 +71,10 @@ int	init_philosophers(t_data *data)
 		return (0);
 	}
 	i = -1;
-	if (data->philo_count == 1)
-		return (init_alone_philo(data));
-	else
+	while (++i < data->philo_count)
 	{
-		while (++i < data->philo_count)
-		{
-			if (!data_philo_init(data, i))
-				return (0);
-		}
+		if (!data_philo_init(data, i))
+			return (0);
 	}
 	return (1);
 }
@@ -128,6 +124,12 @@ int	main(int argc, char **argv)
 		return (0);
 	if (!init_mutexes(&data))
 		return (free_all(&data, 1));
+	if (data.philo_count == 1)
+	{
+		if (!init_alone_philo(&data))
+			return (free_all(&data, 0));
+		return (1);
+	}
 	if (!init_philosophers(&data))
 		return (free_all(&data, 0));
 	if (!create_monitor_thread(&data))

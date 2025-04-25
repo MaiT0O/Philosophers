@@ -39,6 +39,7 @@ typedef struct s_data
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				must_eat_count;
+	int				die;
 	pthread_mutex_t	philo_full_mutex;
 	int				philo_full;
 	long			start;
@@ -87,8 +88,8 @@ int		init_array_fork(t_data *data);
 int	data_philo_init(t_data *data, int i);
 
 /*get.c*/
-int		is_simulation_running(t_data *data);
-void	stop_simulation(t_data *data);
+int		is_running(t_data *data);
+void	stop_simulation(t_philo *philo);
 int		get_philo_full(t_data *data);
 void	increment_philo_full(t_data *data);
 long	get_last_eat(t_philo *philo);

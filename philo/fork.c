@@ -20,7 +20,7 @@ void	release_forks(t_philo *philo)
 
 int	safe_forks(t_philo *philo, int flag)
 {
-	if (!philo->data->simulation_running)
+	if (is_running(philo->data))
 	{
 		if (philo->id % 2 == 0 && flag == 0)
 		{
@@ -52,7 +52,7 @@ int	touch_fork(t_philo *philo, int left_fork, int right_fork)
 
 void	take_forks(t_philo *philo)
 {
-	if (philo->data->simulation_running)
+	if (is_running(philo->data))
 	{
 		if (philo->id % 2 == 0)
 		{
