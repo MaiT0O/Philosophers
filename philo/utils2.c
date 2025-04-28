@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/04 13:06:09 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/15 12:46:39 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/28 16:38:45 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,13 @@ long	get_time_ms(void)
 	return (res);
 }
 
-long correct_time(t_data *data)
+long	correct_time(t_data *data)
 {
-    long time;
+	long	time;
 
-    pthread_mutex_lock(&data->start_mutex);
-    time = get_time_ms();
-    time = time - data->start;
-    pthread_mutex_unlock(&data->start_mutex);
-
-    return (time);
+	pthread_mutex_lock(&data->start_mutex);
+	time = get_time_ms();
+	time = time - data->start;
+	pthread_mutex_unlock(&data->start_mutex);
+	return (time);
 }

@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 12:36:45 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/15 12:36:46 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/28 16:39:48 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ typedef struct s_data
 	int				die;
 	pthread_mutex_t	philo_full_mutex;
 	int				philo_full;
-	pthread_mutex_t start_mutex;
+	pthread_mutex_t	start_mutex;
 	long			start;
 	pthread_mutex_t	print;
 	pthread_mutex_t	*forks;
@@ -59,8 +59,8 @@ void	take_forks(t_philo *philo);
 /*utils.c.*/
 long	ft_atoi_custom(const char *str);
 int		validate_arguments(int argc, char **argv);
-int		free_all(t_data *data, int flag);
-void	end(t_data *data);
+int		free_all(t_data *data);
+int		end(t_data *data);
 
 /*utils2.c*/
 int		is_dead(t_philo *philo);
@@ -83,7 +83,7 @@ void	print_meal(t_data *data);
 int		init_alone_philo(t_data *data);
 void	*alone_philosophe_routine(void *arg);
 int		create_monitor_thread(t_data *data);
-int		init_list_philos(t_data *data);
+int		init_list(t_data *data);
 
 /*main.c*/
 int		data_philo_init(t_data *data, int i);
@@ -96,6 +96,7 @@ void	increment_philo_full(t_data *data);
 long	get_last_eat(t_philo *philo);
 void	set_last_eat(t_philo *philo);
 
+void	debug_mutex(t_data *data);
 // Messages pour les philosophes
 # define MSG_TAKE_FORK "has taken a fork"
 # define MSG_EATING "is eating"

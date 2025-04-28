@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:53 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/14 16:27:43 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/28 16:30:57 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	init_data(t_data *data, int argc, char **argv)
 	data->forks = NULL;
 	data->philos = NULL;
 	data->start = get_time_ms();
-	if (!init_list_philos(data))
+	if (!init_list(data))
 		return (0);
 	return (1);
 }
@@ -54,15 +54,10 @@ int	data_philo_init(t_data *data, int i)
 	data->philos[i].eat_count = 0;
 	data->philos[i].last_eat = get_time_ms();
 	data->philos[i].data = data;
-	if (pthread_mutex_init(&data->philos[i].last_eat_mutex, NULL) != 0)
-	{
-		printf("%s %d.\n", ERR_MUTEXES, i + 1);
-    	return (0);
-	}
 	if (data->philo_count == 1)
 		return (1);
 	else if (pthread_create(&data->philos[i].thread, NULL,
-		philosopher_routine, &data->philos[i]) != 0)
+			philosopher_routine, &data->philos[i]) != 0)
 	{
 		printf("%s %d.\n", ERR_THREAD, i + 1);
 		return (0);
@@ -74,26 +69,20 @@ int	init_mutexes(t_data *data)
 {
 	int	i;
 
-	data->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
-			* data->philo_count);
-	if (!data->forks)
-	{
-		printf("%s\n", ERR_MEMORY_ALLOC);
-		return (0);
-	}
 	i = -1;
 	while (++i < data->philo_count)
 	{
-		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
+		if (pthread_mutex_init(&data->forks[i], NULL) != 0
+			|| pthread_mutex_init(&data->philos[i].last_eat_mutex, NULL) != 0)
 		{
 			printf("%s\n", ERR_MUTEXES);
 			return (0);
 		}
 	}
-	if (pthread_mutex_init(&data->print, NULL) != 0 ||
-			pthread_mutex_init(&data->simulation_mutex, NULL) != 0 ||
-			pthread_mutex_init(&data->philo_full_mutex, NULL) != 0 ||
-			pthread_mutex_init(&data->start_mutex, NULL) != 0)
+	if (pthread_mutex_init(&data->print, NULL) != 0
+		|| pthread_mutex_init(&data->simulation_mutex, NULL) != 0
+		|| pthread_mutex_init(&data->philo_full_mutex, NULL) != 0
+		|| pthread_mutex_init(&data->start_mutex, NULL) != 0)
 	{
 		printf("%s\n", ERR_MUTEXES);
 		return (0);
@@ -111,21 +100,21 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	if (!validate_arguments(argc, argv))
-		return (0);
+		return (1);
 	if (!init_data(&data, argc, argv))
-		return (0);
+		return (1);
 	if (!init_mutexes(&data))
-		return (free_all(&data, 1));
+		return (end(&data));
 	if (data.philo_count == 1)
 	{
 		if (!init_alone_philo(&data))
-			return (free_all(&data, 0));
-		return (1);
+			return (end(&data));
+		return (end(&data));
 	}
 	if (!init_philosophers(&data))
-		return (free_all(&data, 0));
+		return (end(&data));
 	if (!create_monitor_thread(&data))
-		return (free_all(&data, 0));
+		return (end(&data));
 	end(&data);
 	return (0);
 }

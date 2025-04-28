@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:56 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/15 12:55:51 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/28 16:29:08 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void	*monitor_routine(void *arg)
 	while (1)
 	{
 		if (!is_running(data))
-			break;
+			break ;
 		i = 0;
 		while (i < data->philo_count && is_running(data))
 		{
