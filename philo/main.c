@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:53 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/28 16:30:57 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/29 16:25:19 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,27 +40,19 @@ int	init_philosophers(t_data *data)
 	i = -1;
 	while (++i < data->philo_count)
 	{
-		if (!data_philo_init(data, i))
-			return (0);
-	}
-	return (1);
-}
-
-int	data_philo_init(t_data *data, int i)
-{
-	data->philos[i].id = i + 1;
-	data->philos[i].left_fork = i;
-	data->philos[i].right_fork = (i + 1) % data->philo_count;
-	data->philos[i].eat_count = 0;
-	data->philos[i].last_eat = get_time_ms();
-	data->philos[i].data = data;
-	if (data->philo_count == 1)
-		return (1);
-	else if (pthread_create(&data->philos[i].thread, NULL,
+		data->philos[i].id = i + 1;
+		data->philos[i].left_fork = i;
+		data->philos[i].right_fork = (i + 1) % data->philo_count;
+		data->philos[i].eat_count = 0;
+		data->philos[i].data = data;
+		if (data->philo_count == 1)
+			return (init_alone_philo(data));
+		else if (pthread_create(&data->philos[i].thread, NULL,
 			philosopher_routine, &data->philos[i]) != 0)
-	{
-		printf("%s %d.\n", ERR_THREAD, i + 1);
-		return (0);
+		{
+			printf("%s %d.\n", ERR_THREAD, i + 1);
+			return (0);
+		}
 	}
 	return (1);
 }

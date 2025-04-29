@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 12:36:45 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/28 16:39:48 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/29 14:44:16 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ typedef struct s_data
 	int				time_to_sleep;
 	int				must_eat_count;
 	int				die;
+	int				free;
 	pthread_mutex_t	philo_full_mutex;
 	int				philo_full;
 	pthread_mutex_t	start_mutex;

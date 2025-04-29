@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 12:36:40 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/28 16:36:40 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/29 16:29:44 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 int	init_alone_philo(t_data *data)
 {
-	data_philo_init(data, 0);
 	if (pthread_create(&data->philos[0].thread, NULL,
 			alone_philosophe_routine, &data->philos[0]) != 0)
 	{
@@ -38,17 +37,6 @@ void	*alone_philosophe_routine(void *arg)
 	return (NULL);
 }
 
-int	create_monitor_thread(t_data *data)
-{
-	if (pthread_create(&data->monitor_thread, NULL,
-			monitor_routine, data) != 0)
-	{
-		printf("Error: Failed to create monitor thread.\n");
-		return (0);
-	}
-	return (1);
-}
-
 int	init_list(t_data *data)
 {
 	data->philos = (t_philo *)malloc(sizeof(t_philo) * (data->philo_count + 1));
@@ -67,21 +55,13 @@ int	init_list(t_data *data)
 	return (1);
 }
 
-int	is_mutex_locked(pthread_mutex_t *mutex)
+int	create_monitor_thread(t_data *data)
 {
-	if (pthread_mutex_trylock(mutex) == 0)
+	if (pthread_create(&data->monitor_thread, NULL,
+			monitor_routine, data) != 0)
 	{
-		pthread_mutex_unlock(mutex);
+		printf("%s %d.\n", ERR_THREAD, 1);
 		return (0);
 	}
 	return (1);
-}
-
-void	debug_mutex(t_data *data)
-{
-	printf("Checking mutex status before destruction:\n");
-	printf("Print mutex locked: %d\n", is_mutex_locked(&data->print));
-	printf("Simulation mutex locked: %d\n", is_mutex_locked(&data->simulation_mutex));
-	printf("Philo_full mutex locked: %d\n", is_mutex_locked(&data->philo_full_mutex));
-	printf("Start mutex locked: %d\n", is_mutex_locked(&data->start_mutex));
 }
