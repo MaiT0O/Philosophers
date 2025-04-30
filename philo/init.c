@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 12:36:40 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/28 16:36:40 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:36:28 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ void	*alone_philosophe_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	set_last_eat(philo);
 	print_fork(philo);
 	philosopher_think(philo);
 	while (!is_dead(philo))
@@ -67,21 +66,9 @@ int	init_list(t_data *data)
 	return (1);
 }
 
-int	is_mutex_locked(pthread_mutex_t *mutex)
+void	set_last_eat(t_philo *philo)
 {
-	if (pthread_mutex_trylock(mutex) == 0)
-	{
-		pthread_mutex_unlock(mutex);
-		return (0);
-	}
-	return (1);
-}
-
-void	debug_mutex(t_data *data)
-{
-	printf("Checking mutex status before destruction:\n");
-	printf("Print mutex locked: %d\n", is_mutex_locked(&data->print));
-	printf("Simulation mutex locked: %d\n", is_mutex_locked(&data->simulation_mutex));
-	printf("Philo_full mutex locked: %d\n", is_mutex_locked(&data->philo_full_mutex));
-	printf("Start mutex locked: %d\n", is_mutex_locked(&data->start_mutex));
+	pthread_mutex_lock(&philo->last_eat_mutex);
+	philo->last_eat = get_time_ms();
+	pthread_mutex_unlock(&philo->last_eat_mutex);
 }

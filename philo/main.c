@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:53 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/28 16:30:57 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:23:56 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,9 +102,9 @@ int	main(int argc, char **argv)
 	if (!validate_arguments(argc, argv))
 		return (1);
 	if (!init_data(&data, argc, argv))
-		return (1);
+		return (free_all(&data));
 	if (!init_mutexes(&data))
-		return (end(&data));
+		return (free_all(&data));
 	if (data.philo_count == 1)
 	{
 		if (!init_alone_philo(&data))
