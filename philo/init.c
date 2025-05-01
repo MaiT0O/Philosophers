@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 12:36:40 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/29 16:29:44 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:36:28 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ void	*alone_philosophe_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	set_last_eat(philo);
 	print_fork(philo);
 	philosopher_think(philo);
 	while (!is_dead(philo))
@@ -53,24 +52,12 @@ int	init_list(t_data *data)
 		printf("%s\n", ERR_MEMORY_ALLOC);
 		return (0);
 	}
-	data->forks_locked = (int *)malloc(sizeof(int) * (data->philo_count + 1));
-	if (!data->forks_locked)
-	{
-		free(data->philos);
-		free(data->forks);
-		printf("%s\n", ERR_MEMORY_ALLOC);
-		return (0);
-	}
 	return (1);
 }
 
-int	create_monitor_thread(t_data *data)
+void	set_last_eat(t_philo *philo)
 {
-	if (pthread_create(&data->monitor_thread, NULL,
-			monitor_routine, data) != 0)
-	{
-		printf("%s %d.\n", ERR_THREAD, 1);
-		return (0);
-	}
-	return (1);
+	pthread_mutex_lock(&philo->last_eat_mutex);
+	philo->last_eat = get_time_ms();
+	pthread_mutex_unlock(&philo->last_eat_mutex);
 }

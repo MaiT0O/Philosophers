@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 12:36:45 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/29 14:44:16 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:38:49 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ typedef struct s_data
 
 /*fork.c*/
 void	release_forks(t_philo *philo);
-void	take_forks(t_philo *philo);
+int	take_forks(t_philo *philo);
 
 /*utils.c.*/
 long	ft_atoi_custom(const char *str);
@@ -74,8 +74,7 @@ long	correct_time(t_data *data);
 /*routine.c*/
 void	*philosopher_routine(void *arg);
 void	*monitor_routine(void *arg);
-void	philosopher_think(t_philo *philo);
-void	philosopher_sleep(t_philo *philo);
+int		philosopher_think(t_philo *philo);
 
 /*print.c*/
 void	print_fork(t_philo *philo);
@@ -87,6 +86,7 @@ int		init_alone_philo(t_data *data);
 void	*alone_philosophe_routine(void *arg);
 int		create_monitor_thread(t_data *data);
 int		init_list(t_data *data);
+void	set_last_eat(t_philo *philo);
 
 /*main.c*/
 int		data_philo_init(t_data *data, int i);
@@ -97,9 +97,7 @@ void	stop_simulation(t_philo *philo);
 int		get_philo_full(t_data *data);
 void	increment_philo_full(t_data *data);
 long	get_last_eat(t_philo *philo);
-void	set_last_eat(t_philo *philo);
 
-void	debug_mutex(t_data *data);
 // Messages pour les philosophes
 # define MSG_TAKE_FORK "has taken a fork"
 # define MSG_EATING "is eating"

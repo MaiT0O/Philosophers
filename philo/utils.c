@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:23:01 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/29 14:58:06 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:24:29 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,6 @@ int	free_all(t_data *data)
 {
 	int	i;
 
-	if (!data)
-		return (0);
 	if (data->forks)
 	{
 		i = -1;
@@ -108,13 +106,12 @@ int	free_all(t_data *data)
 		i = -1;
 		while (++i < data->philo_count)
 			pthread_mutex_destroy(&data->philos[i].last_eat_mutex);
+		free(data->philos);
 	}
-	free(data->philos);
 	pthread_mutex_destroy(&data->print);
 	pthread_mutex_destroy(&data->simulation_mutex);
 	pthread_mutex_destroy(&data->philo_full_mutex);
 	pthread_mutex_destroy(&data->start_mutex);
-	pthread_mutex_destroy(&data->locked);
 	return (1);
 }
 
@@ -130,34 +127,6 @@ int	end(t_data *data)
 	}
 	if (data->philo_count > 1)
 		pthread_join(data->monitor_thread, NULL);
-	debug_mutex(data);
 	free_all(data);
 	return (1);
-}
-
-int	is_mutex_locked(pthread_mutex_t *mutex)
-{
-	if (pthread_mutex_trylock(mutex) == 0)
-	{
-		pthread_mutex_unlock(mutex);
-		return (0);
-	}
-	return (1);
-}
-
-void	debug_mutex(t_data *data)
-{
-	int	i;
-
-	i = -1;
-	printf("Checking mutex status before destruction:\n");
-	while (++i < data->philo_count)
-	{
-		printf("last_eat %d mutex locked : %d\n", i, is_mutex_locked(&data->philos[i].last_eat_mutex));
-		printf("fork %d mutex locked : %d\n", i, is_mutex_locked(&data->forks[i]));
-	}
-	printf("Print mutex locked: %d\n", is_mutex_locked(&data->print));
-	printf("Simulation mutex locked: %d\n", is_mutex_locked(&data->simulation_mutex));
-	printf("Philo_full mutex locked: %d\n", is_mutex_locked(&data->philo_full_mutex));
-	printf("Start mutex locked: %d\n", is_mutex_locked(&data->start_mutex));
 }

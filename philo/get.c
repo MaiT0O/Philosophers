@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 16:36:54 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/28 16:37:36 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/04/30 13:36:23 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,11 +59,4 @@ long	get_last_eat(t_philo *philo)
 	last_eat = philo->last_eat;
 	pthread_mutex_unlock(&philo->last_eat_mutex);
 	return (last_eat);
-}
-
-void	set_last_eat(t_philo *philo)
-{
-	pthread_mutex_lock(&philo->last_eat_mutex);
-	philo->last_eat = get_time_ms();
-	pthread_mutex_unlock(&philo->last_eat_mutex);
 }

@@ -12,7 +12,7 @@
 
 #include "philo.h"
 
-void	philosopher_think(t_philo *philo)
+int	philosopher_think(t_philo *philo)
 {
 	if (is_running(philo->data))
 	{
@@ -20,11 +20,12 @@ void	philosopher_think(t_philo *philo)
 		printf("%ld %d %s\n", correct_time(philo->data),
 			philo->id, MSG_THINKING);
 		pthread_mutex_unlock(&philo->data->print);
+		return (1);
 	}
-	return ;
+	return (0);
 }
 
-void	philosopher_sleep(t_philo *philo)
+int	philosopher_sleep(t_philo *philo)
 {
 	if (is_running(philo->data))
 	{
@@ -33,11 +34,12 @@ void	philosopher_sleep(t_philo *philo)
 			philo->id, MSG_SLEEPING);
 		pthread_mutex_unlock(&philo->data->print);
 		usleep(philo->data->time_to_sleep * 1000);
+		return (1);
 	}
-	return ;
+	return (0);
 }
 
-void	philosopher_eat(t_philo *philo)
+int	philosopher_eat(t_philo *philo)
 {
 	if (is_running(philo->data))
 	{
@@ -49,8 +51,9 @@ void	philosopher_eat(t_philo *philo)
 		usleep(philo->data->time_to_eat * 1000);
 		if (philo->eat_count == philo->data->must_eat_count)
 			increment_philo_full(philo->data);
+		return (1);
 	}
-	return ;
+	return (0);
 }
 
 void	*monitor_routine(void *arg)
@@ -85,20 +88,18 @@ void	*philosopher_routine(void *arg)
 	philo = (t_philo *)arg;
 	while (is_running(philo->data))
 	{
-		philosopher_think(philo);
-		if (!is_running(philo->data))
+		if (!philosopher_think(philo))
 			break ;
-		take_forks(philo);
-		if (!is_running(philo->data))
+		if (!take_forks(philo))
+			break ;
+		if (!philosopher_eat(philo))
 		{
 			release_forks(philo);
 			break ;
 		}
-		philosopher_eat(philo);
 		release_forks(philo);
-		if (!is_running(philo->data))
+		if (!philosopher_sleep(philo))
 			break ;
-		philosopher_sleep(philo);
 	}
 	return (NULL);
 }
