@@ -12,16 +12,15 @@
 
 #include "philo.h"
 
-int	is_running(t_data *data)
+int is_running(t_data *data)
 {
-	pthread_mutex_lock(&data->simulation_mutex);
-	if (!data->simulation_running)
-	{
-		pthread_mutex_unlock(&data->simulation_mutex);
-		return (0);
-	}
-	pthread_mutex_unlock(&data->simulation_mutex);
-	return (1);
+    int running;
+
+    pthread_mutex_lock(&data->simulation_mutex);
+    running = data->simulation_running;
+    pthread_mutex_unlock(&data->simulation_mutex);
+
+    return running;
 }
 
 void	stop_simulation(t_philo *philo)

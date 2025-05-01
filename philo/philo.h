@@ -47,6 +47,8 @@ typedef struct s_data
 	long			start;
 	pthread_mutex_t	print;
 	pthread_mutex_t	*forks;
+	int				*forks_locked;
+	pthread_mutex_t	locked;
 	pthread_mutex_t	simulation_mutex;
 	int				simulation_running;
 	pthread_t		monitor_thread;

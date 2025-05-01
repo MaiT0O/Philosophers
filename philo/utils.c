@@ -114,7 +114,12 @@ int	free_all(t_data *data)
 	pthread_mutex_destroy(&data->simulation_mutex);
 	pthread_mutex_destroy(&data->philo_full_mutex);
 	pthread_mutex_destroy(&data->start_mutex);
+<<<<<<< HEAD
 	return (0);
+=======
+	pthread_mutex_destroy(&data->locked);
+	return (1);
+>>>>>>> a8ff51c (int * to clear mutexes destroy error)
 }
 
 int	end(t_data *data)

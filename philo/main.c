@@ -63,18 +63,24 @@ int	init_mutexes(t_data *data)
 
 	i = -1;
 	while (++i < data->philo_count)
-	{
-		if (pthread_mutex_init(&data->forks[i], NULL) != 0
-			|| pthread_mutex_init(&data->philos[i].last_eat_mutex, NULL) != 0)
-		{
-			printf("%s\n", ERR_MUTEXES);
-			return (0);
-		}
-	}
+    {
+        if (pthread_mutex_init(&data->forks[i], NULL) != 0
+            || pthread_mutex_init(&data->philos[i].last_eat_mutex, NULL) != 0)
+        {
+            printf("%s\n", ERR_MUTEXES);
+            while (--i >= 0)
+            {
+                pthread_mutex_destroy(&data->forks[i]);
+                pthread_mutex_destroy(&data->philos[i].last_eat_mutex);
+            }
+            return (0);
+        }
+    }
 	if (pthread_mutex_init(&data->print, NULL) != 0
 		|| pthread_mutex_init(&data->simulation_mutex, NULL) != 0
 		|| pthread_mutex_init(&data->philo_full_mutex, NULL) != 0
-		|| pthread_mutex_init(&data->start_mutex, NULL) != 0)
+		|| pthread_mutex_init(&data->start_mutex, NULL) != 0
+		|| pthread_mutex_init(&data->locked, NULL) != 0)
 	{
 		printf("%s\n", ERR_MUTEXES);
 		return (0);

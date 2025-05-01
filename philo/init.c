@@ -49,6 +49,15 @@ int	init_list(t_data *data)
 			* data->philo_count);
 	if (!data->forks)
 	{
+		free(data->philos);
+		printf("%s\n", ERR_MEMORY_ALLOC);
+		return (0);
+	}
+	data->forks_locked = (int *)malloc(sizeof(int) * (data->philo_count + 1));
+	if (!data->forks_locked)
+	{
+		free(data->philos);
+		free(data->forks);
 		printf("%s\n", ERR_MEMORY_ALLOC);
 		return (0);
 	}
