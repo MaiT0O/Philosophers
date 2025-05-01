@@ -60,6 +60,7 @@ int	init_list(t_data *data)
 			* data->philo_count);
 	if (!data->forks)
 	{
+		free(data->philos);
 		printf("%s\n", ERR_MEMORY_ALLOC);
 		return (0);
 	}
