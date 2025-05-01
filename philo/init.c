@@ -24,6 +24,17 @@ int	init_alone_philo(t_data *data)
 	return (1);
 }
 
+int	create_monitor_thread(t_data *data)
+{
+	if (pthread_create(&data->monitor_thread, NULL,
+			monitor_routine, data) != 0)
+	{
+		printf("Error: Failed to create monitor thread.\n");
+		return (0);
+	}
+	return (1);
+}
+
 void	*alone_philosophe_routine(void *arg)
 {
 	t_philo	*philo;
@@ -35,17 +46,6 @@ void	*alone_philosophe_routine(void *arg)
 		usleep(1000);
 	stop_simulation(philo);
 	return (NULL);
-}
-
-int	create_monitor_thread(t_data *data)
-{
-	if (pthread_create(&data->monitor_thread, NULL,
-			monitor_routine, data) != 0)
-	{
-		printf("Error: Failed to create monitor thread.\n");
-		return (0);
-	}
-	return (1);
 }
 
 int	init_list(t_data *data)
@@ -60,6 +60,7 @@ int	init_list(t_data *data)
 			* data->philo_count);
 	if (!data->forks)
 	{
+		free(data->philos);
 		printf("%s\n", ERR_MEMORY_ALLOC);
 		return (0);
 	}

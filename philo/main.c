@@ -102,7 +102,7 @@ int	main(int argc, char **argv)
 	if (!validate_arguments(argc, argv))
 		return (1);
 	if (!init_data(&data, argc, argv))
-		return (free_all(&data));
+		return (1);
 	if (!init_mutexes(&data))
 		return (free_all(&data));
 	if (data.philo_count == 1)

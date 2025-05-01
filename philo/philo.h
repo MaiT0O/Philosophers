@@ -54,7 +54,7 @@ typedef struct s_data
 
 /*fork.c*/
 void	release_forks(t_philo *philo);
-void	take_forks(t_philo *philo);
+int		take_forks(t_philo *philo);
 
 /*utils.c.*/
 long	ft_atoi_custom(const char *str);
@@ -71,7 +71,7 @@ long	correct_time(t_data *data);
 /*routine.c*/
 void	*philosopher_routine(void *arg);
 void	*monitor_routine(void *arg);
-void	philosopher_think(t_philo *philo);
+int		philosopher_think(t_philo *philo);
 
 /*print.c*/
 void	print_fork(t_philo *philo);
