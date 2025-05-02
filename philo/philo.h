@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 12:36:45 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/30 13:38:49 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/05/02 12:59:04 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int		take_forks(t_philo *philo);
 long	ft_atoi_custom(const char *str);
 int		validate_arguments(int argc, char **argv);
 int		free_all(t_data *data);
-int		end(t_data *data);
+int		end(t_data *data, int flag);
 
 /*utils2.c*/
 int		is_dead(t_philo *philo);

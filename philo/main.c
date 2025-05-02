@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:22:53 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/30 13:23:56 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/05/02 13:00:40 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,13 +108,12 @@ int	main(int argc, char **argv)
 	if (data.philo_count == 1)
 	{
 		if (!init_alone_philo(&data))
-			return (end(&data));
-		return (end(&data));
+			return (free_all(&data));
+		return (end(&data, 0));
 	}
 	if (!init_philosophers(&data))
-		return (end(&data));
+		return (end(&data, 1));
 	if (!create_monitor_thread(&data))
-		return (end(&data));
-	end(&data);
-	return (0);
+		return (end(&data, 1));
+	return (end(&data, 0));
 }

@@ -6,7 +6,7 @@
 /*   By: ebansse <ebansse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:23:01 by ebansse           #+#    #+#             */
-/*   Updated: 2025/04/30 13:24:29 by ebansse          ###   ########.fr       */
+/*   Updated: 2025/05/02 12:58:07 by ebansse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ int	free_all(t_data *data)
 	return (1);
 }
 
-int	end(t_data *data)
+int	end(t_data *data, int flag)
 {
 	int	i;
 
@@ -128,5 +128,5 @@ int	end(t_data *data)
 	if (data->philo_count > 1)
 		pthread_join(data->monitor_thread, NULL);
 	free_all(data);
-	return (1);
+	return (flag);
 }
