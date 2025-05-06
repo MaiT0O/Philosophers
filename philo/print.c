@@ -12,23 +12,50 @@
 
 #include "philo.h"
 
-void	print_fork(t_philo *philo)
+void	set_phi_to(char *activity, t_philo *philo)
 {
-	pthread_mutex_lock(&philo->data->print);
-	printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_TAKE_FORK);
-	pthread_mutex_unlock(&philo->data->print);
+	time_t	action_end_at;
+
+	if (activity[0] == 'E')
+		action_end_at = get_time_ms() + philo->data->time_to_eat;
+	else if (activity[0] == 'S')
+		action_end_at = get_time_ms() + philo->data->time_to_sleep;
+	else if (activity[0] == 'T')
+		action_end_at = get_time_ms() + 0;
+	else if (activity[0] == 'D')
+		action_end_at = get_time_ms() + philo->data->time_to_die;
+	while (get_time_ms() < action_end_at)
+	{
+		if (is_running(philo->data) == false)
+			break ;
+		usleep(100);
+	}
+	if (activity[0] == 'E')
+		philo->eat_count += 1;
 }
 
-void	print_death(t_philo *philo)
+void	print_statement(t_philo *philo, char *status)
 {
-	pthread_mutex_lock(&philo->data->print);
-	printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_DIED);
-	pthread_mutex_unlock(&philo->data->print);
-}
+	time_t	process_at;
+	int		philo_id;
 
-void	print_meal(t_data *data)
-{
-	pthread_mutex_lock(&data->print);
-	printf("%ld all philosophers have had enough to eat\n", correct_time(data));
-	pthread_mutex_unlock(&data->print);
+	pthread_mutex_lock(&philo->data->print);
+	if (is_running(philo->data) == false)
+	{
+		pthread_mutex_unlock(&philo->data->print);
+		return ;
+	}
+	process_at = get_time_ms() - philo->data->start;
+	philo_id = philo->id + 1;
+	if (status[0] == 'D')
+		printf("%ld %d %s\n", process_at, philo_id, "died");
+	else if (status[0] == 'E')
+		printf("%ld %d %s\n", process_at, philo_id, "is eating");
+	else if (status[0] == 'S')
+		printf("%ld %d %s\n", process_at, philo_id, "is sleeping");
+	else if (status[0] == 'T')
+		printf("%ld %d %s\n", process_at, philo_id, "is thinking");
+	else if (status[0] == 'F')
+		printf("%ld %d %s\n", process_at, philo_id, "has taken a fork");
+	pthread_mutex_unlock(&philo->data->print);
 }

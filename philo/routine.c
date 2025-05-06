@@ -12,70 +12,62 @@
 
 #include "philo.h"
 
-int	philosopher_think(t_philo *philo)
+void	think_eat_sleep_process(t_philo *philo)
 {
-	if (is_running(philo->data))
-	{
-		pthread_mutex_lock(&philo->data->print);
-		printf("%ld %d %s\n", correct_time(philo->data),
-			philo->id, MSG_THINKING);
-		pthread_mutex_unlock(&philo->data->print);
-		return (1);
-	}
-	return (0);
+	print_statement(philo, "Think");
+	take_forks(philo);
+	print_statement(philo, "Eating");
+	pthread_mutex_lock(&philo->last_eat_mutex);
+	philo->last_eat = get_time_ms();
+	pthread_mutex_unlock(&philo->last_eat_mutex);
+	if (philo->eat_count == philo->data->must_eat_count)
+		increment_philo_full(philo->data);
+	set_phi_to("Eat", philo);
+	release_forks(philo);
+	print_statement(philo, "Sleeping");
+	set_phi_to("Sleep", philo);
 }
 
-int	philosopher_sleep(t_philo *philo)
+void	*wait_till_die(t_philo *philo)
 {
-	if (is_running(philo->data))
-	{
-		pthread_mutex_lock(&philo->data->print);
-		printf("%ld %d %s\n", correct_time(philo->data),
-			philo->id, MSG_SLEEPING);
-		pthread_mutex_unlock(&philo->data->print);
-		usleep(philo->data->time_to_sleep * 1000);
-		return (1);
-	}
-	return (0);
+	pthread_mutex_lock(&philo->data->forks[0]);
+	print_statement(philo, "Think");
+	print_statement(philo, "Fork_0");
+	set_phi_to("Die", philo);
+	print_statement(philo, "Died");
+	pthread_mutex_unlock(&philo->data->forks[0]);
+	return (NULL);
 }
 
-int	philosopher_eat(t_philo *philo)
+bool	are_all_conditions_reached(t_data *data)
 {
-	if (is_running(philo->data))
+	int	i;
+
+	i = 0;
+	while (i < data->philo_count)
 	{
-		philo->eat_count++;
-		pthread_mutex_lock(&philo->data->print);
-		printf("%ld %d %s\n", correct_time(philo->data), philo->id, MSG_EATING);
-		pthread_mutex_unlock(&philo->data->print);
-		set_last_eat(philo);
-		usleep(philo->data->time_to_eat * 1000);
-		if (philo->eat_count == philo->data->must_eat_count)
-			increment_philo_full(philo->data);
-		return (1);
+		if (is_dead(&data->philos[i]))
+			return (true);
+		i++;
 	}
-	return (0);
+	if (get_philo_full(data) == data->philo_count)
+	{
+		stop_simulation(data, false);
+		return (true);
+	}
+	return (false);
 }
 
 void	*monitor_routine(void *arg)
 {
 	t_data	*data;
-	int		i;
 
 	data = (t_data *)arg;
-	while (1)
+	sync_threads(data->start);
+	while (true)
 	{
-		if (!is_running(data))
-			break ;
-		i = 0;
-		while (i < data->philo_count && is_running(data))
-		{
-			if (is_full(data) || is_dead(&data->philos[i]))
-			{
-				stop_simulation(&data->philos[i]);
-				return (NULL);
-			}
-			i++;
-		}
+		if (are_all_conditions_reached(data) == true)
+			return (NULL);
 		usleep(1000);
 	}
 	return (NULL);
@@ -86,20 +78,10 @@ void	*philosopher_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (is_running(philo->data))
-	{
-		if (!philosopher_think(philo))
-			break ;
-		if (!take_forks(philo))
-			break ;
-		if (!philosopher_eat(philo))
-		{
-			release_forks(philo);
-			break ;
-		}
-		release_forks(philo);
-		if (!philosopher_sleep(philo))
-			break ;
-	}
+	sync_threads(philo->data->start);
+	if (philo->data->philo_count == 1)
+		return (wait_till_die(philo), NULL);
+	while (is_running(philo->data) == true)
+		think_eat_sleep_process(philo);
 	return (NULL);
 }

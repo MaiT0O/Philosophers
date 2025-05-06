@@ -12,27 +12,6 @@
 
 #include "philo.h"
 
-int	init_data(t_data *data, int argc, char **argv)
-{
-	data->philo_count = ft_atoi_custom(argv[1]);
-	data->time_to_die = ft_atoi_custom(argv[2]);
-	data->time_to_eat = ft_atoi_custom(argv[3]);
-	data->time_to_sleep = ft_atoi_custom(argv[4]);
-	data->die = 0;
-	if (argc == 6)
-		data->must_eat_count = ft_atoi_custom(argv[5]);
-	else
-		data->must_eat_count = INT_MIN;
-	data->philo_full = 0;
-	data->simulation_running = 1;
-	data->forks = NULL;
-	data->philos = NULL;
-	data->start = get_time_ms();
-	if (!init_list(data))
-		return (0);
-	return (1);
-}
-
 int	init_philosophers(t_data *data)
 {
 	int	i;
@@ -40,27 +19,12 @@ int	init_philosophers(t_data *data)
 	i = -1;
 	while (++i < data->philo_count)
 	{
-		if (!data_philo_init(data, i))
-			return (0);
-	}
-	return (1);
-}
-
-int	data_philo_init(t_data *data, int i)
-{
-	data->philos[i].id = i + 1;
-	data->philos[i].left_fork = i;
-	data->philos[i].right_fork = (i + 1) % data->philo_count;
-	data->philos[i].eat_count = 0;
-	data->philos[i].last_eat = get_time_ms();
-	data->philos[i].data = data;
-	if (data->philo_count == 1)
-		return (1);
-	else if (pthread_create(&data->philos[i].thread, NULL,
-			philosopher_routine, &data->philos[i]) != 0)
-	{
-		printf("%s %d.\n", ERR_THREAD, i + 1);
-		return (0);
+		data->philos[i].id = i;
+		data->philos[i].left_fork = i;
+		data->philos[i].right_fork = (i + 1) % data->philo_count;
+		data->philos[i].eat_count = 0;
+		data->philos[i].last_eat = data->start;
+		data->philos[i].data = data;
 	}
 	return (1);
 }
@@ -81,8 +45,7 @@ int	init_mutexes(t_data *data)
 	}
 	if (pthread_mutex_init(&data->print, NULL) != 0
 		|| pthread_mutex_init(&data->simulation_mutex, NULL) != 0
-		|| pthread_mutex_init(&data->philo_full_mutex, NULL) != 0
-		|| pthread_mutex_init(&data->start_mutex, NULL) != 0)
+		|| pthread_mutex_init(&data->philo_full_mutex, NULL) != 0)
 	{
 		printf("%s\n", ERR_MUTEXES);
 		return (0);
@@ -90,30 +53,66 @@ int	init_mutexes(t_data *data)
 	return (1);
 }
 
+bool	begin_process(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->philo_count)
+	{
+		if (pthread_create(&data->philos[i].thread, NULL, philosopher_routine
+				, &data->philos[i]) != 0)
+			return (printf("bp: error init thread"), free_all(data), false);
+		i++;
+	}
+	if (data->philo_count > 1)
+	{
+		if (pthread_create(&data->monitor_thread, NULL, monitor_routine
+				, data) != 0)
+			return (printf("bp: error init threat"), free_all(data), false);
+	}
+	return (true);
+}
+
+t_data	*init_data(int argc, char **argv)
+{
+	t_data	*data;
+
+	data = malloc(sizeof(t_data));
+	if (!data)
+		return (printf("ITP: error malloc"), NULL);
+	data->philo_count = ft_atoi_custom(argv[1]);
+	data->time_to_die = ft_atoi_custom(argv[2]);
+	data->time_to_eat = ft_atoi_custom(argv[3]);
+	data->time_to_sleep = ft_atoi_custom(argv[4]);
+	if (argc == 6)
+		data->must_eat_count = ft_atoi_custom(argv[5]);
+	else
+		data->must_eat_count = -1;
+	data->philo_full = 0;
+	data->simulation_running = true;
+	data->start = get_time_ms() + (data->philo_count * 2 * 10);
+	if (!init_list(data))
+		return (NULL);
+	if (!init_philosophers(data))
+		return (NULL);
+	if (!init_mutexes(data))
+		return (NULL);
+	return (data);
+}
+
 int	main(int argc, char **argv)
 {
-	t_data	data;
+	t_data	*data;
 
-	if (argc < 5 || argc > 6)
-	{
-		printf("%s\n", USAGE);
-		return (1);
-	}
+	data = NULL;
 	if (!validate_arguments(argc, argv))
-		return (1);
-	if (!init_data(&data, argc, argv))
-		return (1);
-	if (!init_mutexes(&data))
-		return (free_all(&data));
-	if (data.philo_count == 1)
-	{
-		if (!init_alone_philo(&data))
-			return (free_all(&data));
-		return (end(&data, 0));
-	}
-	if (!init_philosophers(&data))
-		return (end(&data, 1));
-	if (!create_monitor_thread(&data))
-		return (end(&data, 1));
-	return (end(&data, 0));
+		exit(1);
+	data = init_data(argc, argv);
+	if (!data)
+		exit (1);
+	if (!begin_process(data))
+		exit (1);
+	end(data);
+	return (0);
 }

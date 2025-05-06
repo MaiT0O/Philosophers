@@ -12,27 +12,23 @@
 
 #include "philo.h"
 
-int	is_running(t_data *data)
+bool	is_running(t_data *data)
 {
+	bool	res;
+
+	res = true;
 	pthread_mutex_lock(&data->simulation_mutex);
-	if (!data->simulation_running)
-	{
-		pthread_mutex_unlock(&data->simulation_mutex);
-		return (0);
-	}
+	if (data->simulation_running == false)
+		res = false;
 	pthread_mutex_unlock(&data->simulation_mutex);
-	return (1);
+	return (res);
 }
 
-void	stop_simulation(t_philo *philo)
+void	stop_simulation(t_data *data, bool state)
 {
-	pthread_mutex_lock(&philo->data->simulation_mutex);
-	philo->data->simulation_running = 0;
-	pthread_mutex_unlock(&philo->data->simulation_mutex);
-	if (philo->data->die == 1)
-		print_death(philo);
-	else if (philo->data->die == 0)
-		print_meal(philo->data);
+	pthread_mutex_lock(&data->simulation_mutex);
+	data->simulation_running = state;
+	pthread_mutex_unlock(&data->simulation_mutex);
 }
 
 int	get_philo_full(t_data *data)
@@ -52,7 +48,7 @@ void	increment_philo_full(t_data *data)
 	pthread_mutex_unlock(&data->philo_full_mutex);
 }
 
-long	get_last_eat(t_philo *philo)
+time_t	get_last_eat(t_philo *philo)
 {
 	long	last_eat;
 

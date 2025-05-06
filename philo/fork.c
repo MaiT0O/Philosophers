@@ -14,43 +14,24 @@
 
 void	release_forks(t_philo *philo)
 {
-	pthread_mutex_unlock(&philo->data->forks[philo->right_fork]);
 	pthread_mutex_unlock(&philo->data->forks[philo->left_fork]);
+	pthread_mutex_unlock(&philo->data->forks[philo->right_fork]);
 }
 
-int	touch_fork(t_philo *philo, int fork_1, int fork_2)
+void	take_forks(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->data->forks[fork_1]);
-	if (!is_running(philo->data))
+	if (philo->id % 2 == 0)
 	{
-		pthread_mutex_unlock(&philo->data->forks[fork_1]);
-		return (0);
+		pthread_mutex_lock(&philo->data->forks[philo->left_fork]);
+		print_statement(philo, "Fork");
+		pthread_mutex_lock(&philo->data->forks[philo->right_fork]);
+		print_statement(philo, "Fork");
 	}
-	print_fork(philo);
-	pthread_mutex_lock(&philo->data->forks[fork_2]);
-	if (!is_running(philo->data))
+	else
 	{
-		release_forks(philo);
-		return (0);
+		pthread_mutex_lock(&philo->data->forks[philo->right_fork]);
+		print_statement(philo, "Fork");
+		pthread_mutex_lock(&philo->data->forks[philo->left_fork]);
+		print_statement(philo, "Fork");
 	}
-	print_fork(philo);
-	return (1);
-}
-
-int	take_forks(t_philo *philo)
-{
-	if (is_running(philo->data))
-	{
-		if (philo->id % 2 == 0)
-		{
-			if (!touch_fork(philo, philo->left_fork, philo->right_fork))
-				return (0);
-		}
-		else
-		{
-			if (!touch_fork(philo, philo->right_fork, philo->left_fork))
-				return (0);
-		}
-	}
-	return (1);
 }

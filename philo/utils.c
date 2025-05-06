@@ -60,7 +60,7 @@ long	ft_atoi_custom(const char *str)
 	{
 		res = (res * 10) + (str[i] - '0');
 		if (res * sign > INT_MAX || res * sign < INT_MIN)
-			return (LONG_MIN);
+			return (-1);
 		i++;
 	}
 	return (res * sign);
@@ -72,6 +72,11 @@ int	validate_arguments(int argc, char **argv)
 	long	value;
 
 	i = 1;
+	if (argc < 5 || argc > 6)
+	{
+		printf("%s\n", USAGE);
+		return (0);
+	}
 	while (i < argc)
 	{
 		if (!is_valid_number(argv[i]))
@@ -90,7 +95,7 @@ int	validate_arguments(int argc, char **argv)
 	return (1);
 }
 
-int	free_all(t_data *data)
+void	free_all(t_data *data)
 {
 	int	i;
 
@@ -111,11 +116,9 @@ int	free_all(t_data *data)
 	pthread_mutex_destroy(&data->print);
 	pthread_mutex_destroy(&data->simulation_mutex);
 	pthread_mutex_destroy(&data->philo_full_mutex);
-	pthread_mutex_destroy(&data->start_mutex);
-	return (1);
 }
 
-int	end(t_data *data, int flag)
+void	end(t_data *data)
 {
 	int	i;
 
@@ -128,5 +131,5 @@ int	end(t_data *data, int flag)
 	if (data->philo_count > 1)
 		pthread_join(data->monitor_thread, NULL);
 	free_all(data);
-	return (flag);
+	free(data);
 }

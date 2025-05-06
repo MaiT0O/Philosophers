@@ -13,12 +13,13 @@
 #ifndef PHILO_H
 # define PHILO_H
 
-# include <pthread.h>
-# include <stdio.h>
+# include <pthread.h>	// to create threads and mutex
+# include <limits.h>	// INT_MIN/MAX
+# include <unistd.h>	// for usleep() & write
+# include <stdio.h>		// malloc
 # include <stdlib.h>
-# include <unistd.h>
-# include <sys/time.h>
-# include <limits.h>
+# include <sys/time.h>	// To get current time
+# include <stdbool.h>
 
 typedef struct s_philo
 {
@@ -27,7 +28,7 @@ typedef struct s_philo
 	int				right_fork;
 	int				eat_count;
 	pthread_mutex_t	last_eat_mutex;
-	long			last_eat;
+	time_t			last_eat;
 	pthread_t		thread;
 	struct s_data	*data;
 }				t_philo;
@@ -35,65 +36,51 @@ typedef struct s_philo
 typedef struct s_data
 {
 	int				philo_count;
-	int				time_to_die;
-	int				time_to_eat;
-	int				time_to_sleep;
 	int				must_eat_count;
-	int				die;
+	time_t			time_to_die;
+	time_t			time_to_eat;
+	time_t			time_to_sleep;
+	time_t			start;
 	pthread_mutex_t	philo_full_mutex;
 	int				philo_full;
-	pthread_mutex_t	start_mutex;
-	long			start;
 	pthread_mutex_t	print;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	simulation_mutex;
-	int				simulation_running;
+	bool			simulation_running;
 	pthread_t		monitor_thread;
 	t_philo			*philos;
 }				t_data;
 
 /*fork.c*/
 void	release_forks(t_philo *philo);
-int		take_forks(t_philo *philo);
+void	take_forks(t_philo *philo);
 
 /*utils.c.*/
 long	ft_atoi_custom(const char *str);
 int		validate_arguments(int argc, char **argv);
-int		free_all(t_data *data);
-int		end(t_data *data, int flag);
+void	free_all(t_data *data);
+void	end(t_data *data);
 
 /*utils2.c*/
-int		is_dead(t_philo *philo);
-int		is_full(t_data *data);
-long	get_time_ms(void);
-long	correct_time(t_data *data);
+bool	is_dead(t_philo *philo);
+time_t	get_time_ms(void);
+void	sync_threads(time_t start_meeting_at);
+int		init_list(t_data *data);
 
 /*routine.c*/
 void	*philosopher_routine(void *arg);
 void	*monitor_routine(void *arg);
-int		philosopher_think(t_philo *philo);
 
 /*print.c*/
-void	print_fork(t_philo *philo);
-void	print_death(t_philo *philo);
-void	print_meal(t_data *data);
-
-/*init.c*/
-int		init_alone_philo(t_data *data);
-void	*alone_philosophe_routine(void *arg);
-int		create_monitor_thread(t_data *data);
-int		init_list(t_data *data);
-void	set_last_eat(t_philo *philo);
-
-/*main.c*/
-int		data_philo_init(t_data *data, int i);
+void	set_phi_to(char *activity, t_philo *philo);
+void	print_statement(t_philo *philo, char *status);
 
 /*get.c*/
-int		is_running(t_data *data);
-void	stop_simulation(t_philo *philo);
+bool	is_running(t_data *data);
+void	stop_simulation(t_data *data, bool state);
 int		get_philo_full(t_data *data);
 void	increment_philo_full(t_data *data);
-long	get_last_eat(t_philo *philo);
+time_t	get_last_eat(t_philo *philo);
 
 // Messages pour les philosophes
 # define MSG_TAKE_FORK "has taken a fork"

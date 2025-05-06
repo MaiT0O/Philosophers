@@ -12,29 +12,40 @@
 
 #include "philo.h"
 
-int	is_full(t_data *data)
+int	init_list(t_data *data)
 {
-	if (get_philo_full(data) == data->philo_count)
-		return (1);
-	return (0);
+	data->philos = (t_philo *)malloc(sizeof(t_philo) * (data->philo_count));
+	if (!data->philos)
+	{
+		printf("%s\n", ERR_MEMORY_ALLOC);
+		return (0);
+	}
+	data->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
+			* data->philo_count);
+	if (!data->forks)
+	{
+		free(data->philos);
+		printf("%s\n", ERR_MEMORY_ALLOC);
+		return (0);
+	}
+	return (1);
 }
 
-int	is_dead(t_philo *philo)
+bool	is_dead(t_philo *philo)
 {
-	long	current_time;
-	long	time_since_last_meal;
+	time_t	current_time;
 
 	current_time = get_time_ms();
-	time_since_last_meal = current_time - get_last_eat(philo);
-	if (time_since_last_meal > philo->data->time_to_die)
+	if ((current_time - get_last_eat(philo)) > philo->data->time_to_die)
 	{
-		philo->data->die = 1;
-		return (1);
+		print_statement(philo, "DIED");
+		stop_simulation(philo->data, false);
+		return (true);
 	}
-	return (0);
+	return (false);
 }
 
-long	get_time_ms(void)
+time_t	get_time_ms(void)
 {
 	struct timeval	tv;
 	long			res;
@@ -48,13 +59,8 @@ long	get_time_ms(void)
 	return (res);
 }
 
-long	correct_time(t_data *data)
+void	sync_threads(time_t start_meeting_at)
 {
-	long	time;
-
-	pthread_mutex_lock(&data->start_mutex);
-	time = get_time_ms();
-	time = time - data->start;
-	pthread_mutex_unlock(&data->start_mutex);
-	return (time);
+	while (get_time_ms() < start_meeting_at)
+		continue ;
 }
